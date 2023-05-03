@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 import scipy.io as sciio
-
+from time import time
 import sklearn
 # %matplotlib inline
 from sklearn.datasets import make_blobs
@@ -66,22 +66,27 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
 # image_dataset = load_image_files('/home/kc501/LJY/Alexnet/dataRCS')
 
 # ----ICraft----
+t_load_data=time()
 image_dataset = load_image_files('.\dataRCS')
+print("Data load done in %0.3fs" % (time() - t_load_data))
 # image_dataset_test = load_image_files("E:/RL_code/alex-net-image-classification-master/class3/val")
 # Split data
 X_train, X_test, y_train, y_test = train_test_split(
     image_dataset.data, image_dataset.target, test_size=0.2, random_state=101)
+
 # X_train = image_dataset.data
 # y_train = image_dataset.target
 # X_test = image_dataset_test.data
 # y_test = image_dataset_test.target
 f= open('./TZB.txt','w')
 for n_components in range(200, 201):
+    t_NMF = time()
     nmf = NMF(n_components=n_components, init='nndsvd', tol=5e-3, max_iter=1000).fit(X_train)
     # W = nmf.components_.reshape((n_components, 64, 64))
 
     X_train_nmf = nmf.transform(X_train)
     X_test_nmf = nmf.transform(X_test)
+    print("NMF done in %0.3fs" % (time() - t_NMF))
     # X = X_train_nmf
     # y = y_train
 
@@ -90,9 +95,11 @@ for n_components in range(200, 201):
     # 设定class_weight
     # c=np.arange(10,30)  #25
 
+    t_train=time()
     clf = SVC(C=100, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo')
-
+    print("NMF done in %0.3fs" % (time() - t_train))
     clf = clf.fit(X_train_nmf, y_train)
+
     y_true_train = y_train
     y_pred_train = clf.predict(X_train_nmf)
     y_true_test = y_test
