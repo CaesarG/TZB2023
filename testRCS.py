@@ -64,7 +64,7 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
 # image_dataset = load_image_files('/home/kc501/LJY/Alexnet/dataRCS')
 
 # ----ICraft----
-image_dataset = load_image_files('E:\Master\TZB\dataRCS')
+image_dataset = load_image_files('.\dataRCS')
 # image_dataset_test = load_image_files("E:/RL_code/alex-net-image-classification-master/class3/val")
 # Split data
 X_train, X_test, y_train, y_test = train_test_split(
@@ -74,7 +74,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # X_test = image_dataset_test.data
 # y_test = image_dataset_test.target
 f= open('./TZB.txt','w')
-for n_components in range(100, 101):
+for n_components in range(200, 201):
     nmf = NMF(n_components=n_components, init='nndsvd', tol=5e-3, max_iter=1000).fit(X_train)
     # W = nmf.components_.reshape((n_components, 64, 64))
 
