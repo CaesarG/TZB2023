@@ -45,8 +45,12 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
             # print(file)
             mat_data = sciio.loadmat(file)
             img = np.abs(mat_data['frame_Ev'])
-            raw_data = [np.real(mat_data['frame_Ev']).flatten(), np.imag(mat_data['frame_Ev']).flatten(),
-                        np.real(mat_data['frame_Eh']).flatten(), np.imag(mat_data['frame_Eh']).flatten()]
+            raw_data = []
+            raw_data.extend(np.real(mat_data['frame_Ev']).flatten())
+            raw_data.extend(np.imag(mat_data['frame_Ev']).flatten())
+            raw_data.extend(np.real(mat_data['frame_Eh']).flatten())
+            raw_data.extend(np.imag(mat_data['frame_Eh']).flatten())
+            # print(np.shape(raw_data))
             flat_data.append(raw_data)
             images.append(img)
             target.append(i)
