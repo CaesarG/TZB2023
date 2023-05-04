@@ -45,10 +45,9 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
             # print(file)
             mat_data = sciio.loadmat(file)
             img = np.abs(mat_data['frame_Ev'])
-            flat_data.append(np.real(mat_data['frame_Ev']).flatten())
-            flat_data.append(np.imag(mat_data['frame_Ev']).flatten())
-            flat_data.append(np.real(mat_data['frame_Eh']).flatten())
-            flat_data.append(np.imag(mat_data['frame_Eh']).flatten())
+            raw_data = [np.real(mat_data['frame_Ev']).flatten(), np.imag(mat_data['frame_Ev']).flatten(),
+                        np.real(mat_data['frame_Eh']).flatten(), np.imag(mat_data['frame_Eh']).flatten()]
+            flat_data.append(raw_data)
             images.append(img)
             target.append(i)
     flat_data = np.array(flat_data)
@@ -62,11 +61,12 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
                  images=images,
                  DESCR=descr)
 
+
 # ----KC501-----
 # image_dataset = load_image_files('/home/kc501/LJY/Alexnet/dataRCS')
 
 # ----ICraft----
-t_load_data=time()
+t_load_data = time()
 image_dataset = load_image_files('.\dataRCS')
 print("Data load done in %0.3fs" % (time() - t_load_data))
 # image_dataset_test = load_image_files("E:/RL_code/alex-net-image-classification-master/class3/val")
@@ -78,7 +78,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # y_train = image_dataset.target
 # X_test = image_dataset_test.data
 # y_test = image_dataset_test.target
-f= open('./TZB.txt','w')
+f = open('./TZB.txt', 'w')
 for n_components in range(200, 201):
     t_NMF = time()
     nmf = NMF(n_components=n_components, init='nndsvd', tol=5e-3, max_iter=1000).fit(X_train)
@@ -95,7 +95,7 @@ for n_components in range(200, 201):
     # 设定class_weight
     # c=np.arange(10,30)  #25
 
-    t_train=time()
+    t_train = time()
     clf = SVC(C=100, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo')
     print("NMF done in %0.3fs" % (time() - t_train))
     clf = clf.fit(X_train_nmf, y_train)
