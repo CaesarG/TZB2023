@@ -107,7 +107,7 @@ for n_components in range(20, 21):
     # c=np.arange(10,30)  #25
 
     t_train = time()
-    clf = SVC(C=1, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo')
+    clf = SVC(C=1, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo', verbose=True)
     print("SVM done in %0.3fs" % (time() - t_train))
 
     if NO_NMF:
