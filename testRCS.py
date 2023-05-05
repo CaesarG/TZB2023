@@ -23,8 +23,8 @@ from sklearn.metrics import accuracy_score
 from skimage.io import imread
 from skimage.transform import resize
 from skimage.transform import resize as imresize
-
-
+REAL_IMAG=False
+NO_NMF=True
 # Load images in structured directory like it's sklearn sample dataset
 def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺寸为dimension=(64, 64)
 
@@ -32,7 +32,7 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
     # folders is the list of folders each conains a category of data
     folders = [directory for directory in image_dir.iterdir() if directory.is_dir()]
     # _______________________________________________________
-    folders = folders[:-1]
+    # folders = folders[:-1]
     # _______________________________________________________
     categories = [fo.name for fo in folders]
 
@@ -40,18 +40,23 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
     images = []
     flat_data = []
     target = []
+
     for i, direc in enumerate(folders):
+        # print(i)
+        # print(direc)
         for file in direc.iterdir():
-            # print(file)
             mat_data = sciio.loadmat(file)
             img = np.abs(mat_data['frame_Ev'])
             raw_data = []
-            raw_data.extend(np.real(mat_data['frame_Ev']).flatten())
-            raw_data.extend(np.imag(mat_data['frame_Ev']).flatten())
-            raw_data.extend(np.real(mat_data['frame_Eh']).flatten())
-            raw_data.extend(np.imag(mat_data['frame_Eh']).flatten())
-            raw_data=np.abs(raw_data)
-            print(np.shape(raw_data))
+            if REAL_IMAG:
+                raw_data.extend(np.real(mat_data['frame_Ev']).flatten())
+                raw_data.extend(np.imag(mat_data['frame_Ev']).flatten())
+                raw_data.extend(np.real(mat_data['frame_Eh']).flatten())
+                raw_data.extend(np.imag(mat_data['frame_Eh']).flatten())
+                raw_data=np.abs(raw_data)
+            else:
+                raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
+                raw_data.extend(np.abs(mat_data['frame_Eh']).flatten())
             flat_data.append(raw_data)
             images.append(img)
             target.append(i)
@@ -84,14 +89,15 @@ X_train, X_test, y_train, y_test = train_test_split(
 # X_test = image_dataset_test.data
 # y_test = image_dataset_test.target
 f = open('./TZB.txt', 'w')
-for n_components in range(200, 201):
-    t_NMF = time()
-    nmf = NMF(n_components=n_components, init='nndsvd', tol=5e-3, max_iter=1000).fit(X_train)
-    # W = nmf.components_.reshape((n_components, 64, 64))
+for n_components in range(20, 21):
+    if not NO_NMF:
+        t_NMF = time()
+        nmf = NMF(n_components=n_components, init='nndsvd', tol=1e-2, max_iter=1000, verbose=True).fit(X_train)
+        # W = nmf.components_.reshape((n_components, 64, 64))
 
-    X_train_nmf = nmf.transform(X_train)
-    X_test_nmf = nmf.transform(X_test)
-    print("NMF done in %0.3fs" % (time() - t_NMF))
+        X_train_nmf = nmf.transform(X_train)
+        X_test_nmf = nmf.transform(X_test)
+        print("NMF done in %0.3fs" % (time() - t_NMF))
     # X = X_train_nmf
     # y = y_train
 
@@ -101,14 +107,21 @@ for n_components in range(200, 201):
     # c=np.arange(10,30)  #25
 
     t_train = time()
-    clf = SVC(C=100, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo')
-    print("NMF done in %0.3fs" % (time() - t_train))
-    clf = clf.fit(X_train_nmf, y_train)
+    clf = SVC(C=1, kernel='poly', gamma=0.01, class_weight='balanced', decision_function_shape='ovo')
+    print("SVM done in %0.3fs" % (time() - t_train))
+
+    if NO_NMF:
+        clf = clf.fit(X_train, y_train)
+        y_pred_train = clf.predict(X_train)
+        y_pred_test = clf.predict(X_test)
+    else:
+        clf = clf.fit(X_train_nmf, y_train)
+        y_pred_train = clf.predict(X_train_nmf)
+        y_pred_test = clf.predict(X_test_nmf)
 
     y_true_train = y_train
-    y_pred_train = clf.predict(X_train_nmf)
     y_true_test = y_test
-    y_pred_test = clf.predict(X_test_nmf)
+
     f.write("n_components: {}\n".format(n_components))
     f.write("Acc on train data: {}\n".format(accuracy_score(y_true_train, y_pred_train)))
     f.write("Acc on test data: {}\n".format(accuracy_score(y_true_test, y_pred_test)))
