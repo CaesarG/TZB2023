@@ -23,8 +23,11 @@ from sklearn.metrics import accuracy_score
 from skimage.io import imread
 from skimage.transform import resize
 from skimage.transform import resize as imresize
-REAL_IMAG=False
-NO_NMF=True
+
+REAL_IMAG = False
+NO_NMF = True
+
+
 # Load images in structured directory like it's sklearn sample dataset
 def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺寸为dimension=(64, 64)
 
@@ -53,7 +56,7 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
                 raw_data.extend(np.imag(mat_data['frame_Ev']).flatten())
                 raw_data.extend(np.real(mat_data['frame_Eh']).flatten())
                 raw_data.extend(np.imag(mat_data['frame_Eh']).flatten())
-                raw_data=np.abs(raw_data)
+                raw_data = np.abs(raw_data)
             else:
                 raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
                 raw_data.extend(np.abs(mat_data['frame_Eh']).flatten())
