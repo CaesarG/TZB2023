@@ -35,7 +35,8 @@ def load_image_files(container_path, dimension=(64, 64)):  # 调整图片的尺�
     # folders is the list of folders each conains a category of data
     folders = [directory for directory in image_dir.iterdir() if directory.is_dir()]
     # _______________________________________________________
-    # folders = folders[:-1]
+    # 去掉annotation文件夹
+    folders = folders[:-1]
     # _______________________________________________________
     categories = [fo.name for fo in folders]
 
