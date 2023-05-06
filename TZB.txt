@@ -1,4 +1,17 @@
 n_components: 20
-Acc on train data: 1.0
-Acc on test data: 0.3
+Acc on train data: 0.9605
+Acc on test data: 0.258
+------------------------------------------------------------------------------
+n_components: 20
+kernel: poly
+tolerance: 0.02
+Acc on train data: 0.782
+Acc on test data: 0.218
+------------------------------------------------------------------------------
+n_components: 20
+kernel: poly
+tolerance: 0.01
+max_iteration: 1000
+Acc on train data: 0.9585
+Acc on test data: 0.238
 ------------------------------------------------------------------------------

@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 
 dataRCS/
+dataRCS2/
+annotations/
 .idea/
