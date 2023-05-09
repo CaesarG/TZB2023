@@ -15,3 +15,488 @@ max_iteration: 1000
 Acc on train data: 0.9585
 Acc on test data: 0.238
 ------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.998
+Acc on test data: 0.278
+------------------------------------------------------------------------------
+n_components: 100
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.978
+Acc on test data: 0.106
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.992
+Acc on test data: 0.282
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.28
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.338
+Acc on test data: 0.204
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.28
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.28
+------------------------------------------------------------------------------
+n_components: 1000
+
+PCA
+
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.126
+------------------------------------------------------------------------------
+n_components: 1000
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.126
+------------------------------------------------------------------------------
+n_components: 1000
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.126
+------------------------------------------------------------------------------
+n_components: 100
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.138
+------------------------------------------------------------------------------
+n_components: 20
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9885
+Acc on test data: 0.214
+------------------------------------------------------------------------------
+n_components: 15
+kernel: poly
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9215
+Acc on test data: 0.222
+------------------------------------------------------------------------------
+n_components: 15
+kernel: sigmoid
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.0325
+Acc on test data: 0.042
+------------------------------------------------------------------------------
+n_components: 15
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9855
+Acc on test data: 0.17
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9725
+Acc on test data: 0.178
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9705
+Acc on test data: 0.186
+------------------------------------------------------------------------------
+n_components: 8
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.962
+Acc on test data: 0.176-------------------------------------------------------------
+n_components: 5
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.985
+Acc on test data: 0.182
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.885
+Acc on test data: 0.192
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9435
+Acc on test data: 0.182
+------------------------------------------------------------------------------
+n_components: 4
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9935
+Acc on test data: 0.176
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.999
+Acc on test data: 0.132
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.1015
+Acc on test data: 0.094
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.103
+Acc on test data: 0.088
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.411
+Acc on test data: 0.136
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9745
+Acc on test data: 0.1
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.964
+Acc on test data: 0.15
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9675
+Acc on test data: 0.15
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.146
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.146
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.146
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9625
+Acc on test data: 0.146
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.916
+Acc on test data: 0.144
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: linear
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.869
+Acc on test data: 0.136
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.411
+Acc on test data: 0.136
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.2955
+Acc on test data: 0.206
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.3795
+Acc on test data: 0.168
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.6985
+Acc on test data: 0.138
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.897
+Acc on test data: 0.158
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.871
+Acc on test data: 0.156
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8575
+Acc on test data: 0.152
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8575
+Acc on test data: 0.152
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.838
+Acc on test data: 0.152
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.3795
+Acc on test data: 0.168
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.6985
+Acc on test data: 0.138
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.6985
+Acc on test data: 0.138
+------------------------------------------------------------------------------
+n_components: 2000
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.897
+Acc on test data: 0.158
+------------------------------------------------------------------------------
+n_components: 100
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.7445
+Acc on test data: 0.19
+------------------------------------------------------------------------------
+n_components: 5
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.391
+Acc on test data: 0.27
+------------------------------------------------------------------------------
+n_components: 5
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.4245
+Acc on test data: 0.25
+------------------------------------------------------------------------------
+n_components: 5
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.461
+Acc on test data: 0.242
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.23
+Acc on test data: 0.19
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.104
+Acc on test data: 0.162
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.2065
+Acc on test data: 0.178
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.201
+Acc on test data: 0.172
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.1955
+Acc on test data: 0.18
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.112
+Acc on test data: 0.13
+------------------------------------------------------------------------------
+n_components: 2
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.1955
+Acc on test data: 0.18
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.3685
+Acc on test data: 0.272
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.4355
+Acc on test data: 0.276
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.514
+Acc on test data: 0.268
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.6385
+Acc on test data: 0.27
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.782
+Acc on test data: 0.254
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.6385
+Acc on test data: 0.27
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.7025
+Acc on test data: 0.246
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8215
+Acc on test data: 0.242
+------------------------------------------------------------------------------
