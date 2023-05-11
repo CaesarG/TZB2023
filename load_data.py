@@ -13,7 +13,7 @@ def load_image_files(container_path, REAL_IMAG):
     # 去掉annotations文件夹
     # folders = folders[:-1]
     # _______________________________________________________
-    categories = [fo.name for fo in folders]
+    categories = [int(fo.name) for fo in folders]
 
     descr = "A image classification dataset"
     images = []
@@ -21,35 +21,37 @@ def load_image_files(container_path, REAL_IMAG):
     target = []
 
     for i, direc in enumerate(folders):
-        # print(i)
         print(i, categories[i])
         # print(direc)
         for file in direc.iterdir():
             mat_data = sciio.loadmat(file)
-            # img = np.abs(mat_data['frame_Ev'])
-            raw_data = []
+            raw_data = np.array([], dtype="float32")
             if REAL_IMAG:
-                # raw_data.extend(np.real(mat_data['frame_Ev']).flatten())
-                # raw_data.extend(np.imag(mat_data['frame_Ev']).flatten())
-                # raw_data.extend(np.real(mat_data['frame_Eh']).flatten())
-                # raw_data.extend(np.imag(mat_data['frame_Eh']).flatten())
+                Ev = np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Ev'], dtype="complex").T))
+                Eh = np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Eh'], dtype="complex").T))
+                # raw_data = np.concatenate((raw_data, np.real(Ev).flatten()), axis=0)
+                # raw_data = np.concatenate((raw_data, np.imag(Ev).flatten()), axis=0)
+                # raw_data = np.concatenate((raw_data, np.real(Eh).flatten()), axis=0)
+                # raw_data = np.concatenate((raw_data, np.imag(Eh).flatten()), axis=0)
+                raw_data = np.concatenate((raw_data, np.abs(Ev).flatten()), axis=0)
+                raw_data = np.concatenate((raw_data, np.abs(Eh).flatten()), axis=0)
+                del Ev
+                del Eh
                 # raw_data = np.abs(raw_data)
-                raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
-                # raw_data.extend((np.angle(mat_data['frame_Ev'].flatten())))
-                raw_data.extend(((np.angle(mat_data['frame_Ev'].flatten()) / np.pi + 1) * 100))
-                raw_data.extend(np.abs(mat_data['frame_Eh'].flatten()))
-                # raw_data.extend((np.angle(mat_data['frame_Eh']).flatten()))
-                raw_data.extend(((np.angle(mat_data['frame_Eh'].flatten()) / np.pi + 1) * 100))
+                # raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
+                # raw_data.extend(((np.angle(mat_data['frame_Ev'].flatten()) / np.pi + 1) * 100))
+                # raw_data.extend(np.abs(mat_data['frame_Eh'].flatten()))
+                # raw_data.extend(((np.angle(mat_data['frame_Eh'].flatten()) / np.pi + 1) * 100))
+
                 # print(Angle(mat_data['frame_Ev'].flatten()))
                 # break
             else:
                 raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
                 raw_data.extend(np.abs(mat_data['frame_Eh']).flatten())
             flat_data.append(raw_data)
-            # images.append(img)
+            del raw_data
             target.append(categories[i])
-        # break
-    # return [flat_data,target,categories,descr]
+
     flat_data = np.array(flat_data, dtype='float32')
     target = np.array(target)
     return Bunch(data=flat_data,

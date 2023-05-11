@@ -500,3 +500,423 @@ max_iteration: 10000
 Acc on train data: 0.8215
 Acc on test data: 0.242
 ------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.1025
+Acc on test data: 0.09
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8325
+Acc on test data: 0.236
+------------------------------------------------------------------------------
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8325
+Acc on test data: 0.22
+------------------------------------------------------------------------------
+SVM done in 1.453s
+n_components: 10
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8325
+Acc on test data: 0.236
+------------------------------------------------------------------------------
+SVM done in 0.471s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.905
+Acc on test data: 0.17
+------------------------------------------------------------------------------
+SVM with scaled done in 0.427s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.964
+Acc on test data: 0.188
+------------------------------------------------------------------------------
+SVM with scaled done in 13.429s
+n_components: 0.95
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 1.0
+Acc on test data: 0.168
+------------------------------------------------------------------------------
+SVM with scaled done in 6.350s
+n_components: 0.95
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.92
+Acc on test data: 0.164
+------------------------------------------------------------------------------
+SVM with scaled done in 0.863s
+n_components: 0.95
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.632
+Acc on test data: 0.17
+------------------------------------------------------------------------------
+SVM with scaled done in 0.399s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.4085
+Acc on test data: 0.106
+------------------------------------------------------------------------------
+SVM with scaled done in 0.415s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.8655
+Acc on test data: 0.188
+------------------------------------------------------------------------------
+SVM with scaled done in 0.426s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.964
+Acc on test data: 0.188
+------------------------------------------------------------------------------
+SVM with scaled done in 0.254s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9975
+Acc on test data: 0.476
+------------------------------------------------------------------------------
+SVM with scaled done in 0.246s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9665
+Acc on test data: 0.514
+------------------------------------------------------------------------------
+SVM with scaled done in 0.234s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.869
+Acc on test data: 0.458
+------------------------------------------------------------------------------
+SVM with scaled done in 0.233s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.716
+Acc on test data: 0.414
+------------------------------------------------------------------------------
+SVM with scaled done in 0.245s
+n_components: 0.95  # PCA自适应
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.9665
+Acc on test data: 0.514
+------------------------------------------------------------------------------
+SVM with scaled done in 0.206s
+n_components: 100
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.893
+Acc on test data: 0.5
+------------------------------------------------------------------------------
+SVM with scaled done in 0.131s
+n_components: 100
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+Acc on train data: 0.937
+Acc on test data: 0.508
+------------------------------------------------------------------------------
+SVM with scaled done in 0.386s
+n_components: 500
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+C: 5000
+Acc on train data: 0.979
+Acc on test data: 0.502
+------------------------------------------------------------------------------
+SVM with scaled done in 0.377s
+n_components: 500
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+C: 1000
+Acc on train data: 0.9465
+Acc on test data: 0.512
+------------------------------------------------------------------------------
+SVM with scaled done in 0.379s
+n_components: 500
+kernel: rbf
+Decomposition: NMF
+tolerance: 0.01
+max_iteration: 10000
+C: 2000
+Acc on train data: 0.9625
+Acc on test data: 0.502
+------------------------------------------------------------------------------
+SVM with scaled done in 0.486s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 2000
+Acc on train data: 0.997
+Acc on test data: 0.406
+------------------------------------------------------------------------------
+SVM with scaled done in 0.498s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 1000
+Acc on train data: 0.992
+Acc on test data: 0.406
+------------------------------------------------------------------------------
+SVM with scaled done in 0.485s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 500
+Acc on train data: 0.982
+Acc on test data: 0.406
+------------------------------------------------------------------------------
+SVM with scaled done in 0.490s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 100
+Acc on train data: 0.9365
+Acc on test data: 0.396
+------------------------------------------------------------------------------
+SVM with scaled done in 0.490s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 200
+Acc on train data: 0.962
+Acc on test data: 0.402
+------------------------------------------------------------------------------
+SVM with scaled done in 0.480s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 300
+Acc on train data: 0.9725
+Acc on test data: 0.404
+------------------------------------------------------------------------------
+SVM with scaled done in 0.482s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 500
+Acc on train data: 0.982
+Acc on test data: 0.406
+------------------------------------------------------------------------------
+SVM with scaled done in 0.475s
+n_components: 0.99
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 1000
+Acc on train data: 0.992
+Acc on test data: 0.406
+------------------------------------------------------------------------------
+SVM with scaled done in 0.983s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 1000
+Acc on train data: 1.0
+Acc on test data: 0.408
+------------------------------------------------------------------------------
+SVM with scaled done in 0.968s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 100
+Acc on train data: 1.0
+Acc on test data: 0.404
+------------------------------------------------------------------------------
+SVM with scaled done in 0.897s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 10
+Acc on train data: 0.988
+Acc on test data: 0.412
+------------------------------------------------------------------------------
+SVM with scaled done in 0.680s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 1
+Acc on train data: 0.9405
+Acc on test data: 0.416
+------------------------------------------------------------------------------
+SVM with scaled done in 0.778s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 2
+Acc on train data: 0.966
+Acc on test data: 0.408
+------------------------------------------------------------------------------
+SVM with scaled done in 0.630s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 0.5
+Acc on train data: 0.8975
+Acc on test data: 0.41
+------------------------------------------------------------------------------
+SVM with scaled done in 0.617s
+n_components: 0.99
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 0.6
+Acc on train data: 0.911
+Acc on test data: 0.416
+------------------------------------------------------------------------------
+SVM with scaled done in 0.283s
+n_components: 0.96
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 1000
+Acc on train data: 0.968
+Acc on test data: 0.486
+------------------------------------------------------------------------------
+SVM with scaled done in 0.287s
+n_components: 0.96
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 500
+Acc on train data: 0.9535
+Acc on test data: 0.488
+------------------------------------------------------------------------------
+SVM with scaled done in 0.273s
+n_components: 0.96
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 300
+Acc on train data: 0.94
+Acc on test data: 0.488
+------------------------------------------------------------------------------
+SVM with scaled done in 0.272s
+n_components: 0.96
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 200
+Acc on train data: 0.9175
+Acc on test data: 0.474
+
+# 先Scaler再pca
+------------------------------------------------------------------------------
+SVM with scaled done in 0.169s
+n_components: 0.95
+kernel: rbf
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 100
+Acc on train data: 0.9375
+Acc on test data: 0.554
+------------------------------------------------------------------------------
+SVM with scaled done in 0.166s
+n_components: 0.95
+kernel: poly
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 3000
+Acc on train data: 0.9625
+Acc on test data: 0.522
+------------------------------------------------------------------------------
+SVM with scaled done in 0.511s
+n_components: 0.95
+kernel: linear
+Decomposition: PCA
+tolerance: 0.01
+max_iteration: 10000
+C: 0.005
+Acc on train data: 0.962
+Acc on test data: 0.548
+------------------------------------------------------------------------------
