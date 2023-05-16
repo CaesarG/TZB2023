@@ -2,6 +2,7 @@ from pathlib import Path
 import scipy.io as sciio
 import numpy as np
 from sklearn.utils import Bunch
+from sklearn.decomposition import PCA
 
 
 # Load images in structured directory like it's sklearn sample dataset
@@ -33,10 +34,16 @@ def load_image_files(container_path, REAL_IMAG):
                 # raw_data = np.concatenate((raw_data, np.imag(Ev).flatten()), axis=0)
                 # raw_data = np.concatenate((raw_data, np.real(Eh).flatten()), axis=0)
                 # raw_data = np.concatenate((raw_data, np.imag(Eh).flatten()), axis=0)
+                # E = np.concatenate((Ev, Eh), axis=0)
+                # pca = PCA(n_components=200)
+                # E = np.abs(E)
+                # E = pca.fit_transform(E)
+                # raw_data = np.float32(E.flatten())
                 raw_data = np.concatenate((raw_data, np.abs(Ev).flatten()), axis=0)
                 raw_data = np.concatenate((raw_data, np.abs(Eh).flatten()), axis=0)
                 del Ev
                 del Eh
+                # del E
                 # raw_data = np.abs(raw_data)
                 # raw_data.extend(np.abs(mat_data['frame_Ev']).flatten())
                 # raw_data.extend(((np.angle(mat_data['frame_Ev'].flatten()) / np.pi + 1) * 100))
@@ -62,6 +69,7 @@ def load_image_files(container_path, REAL_IMAG):
 
 def LOAD_IMAGE(REAL_IMAG):
     image_dataset1 = load_image_files('.\dataRCS', REAL_IMAG)
+    # return image_dataset1
     image_dataset2 = load_image_files('.\dataRCS2', REAL_IMAG)
     # flat_data = np.concatenate([image_dataset1.data, image_dataset2.data])
     # target = np.concatenate([image_dataset1.target, image_dataset2.target])
