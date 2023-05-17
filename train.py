@@ -101,8 +101,8 @@ class TrainModule(object):
         dataset_module = self.dataset
         train_dir = args.data_dir + '/train.txt'
         val_dir = args.data_dir + '/val.txt'
-        dsets['train'] = dataset_module(annotation_lines=train_dir)
-        dsets['val'] = dataset_module(annotation_lines=val_dir)
+        dsets['train'] = dataset_module(annotation_lines=train_dir, phase=args.phase)
+        dsets['val'] = dataset_module(annotation_lines=val_dir, phase=args.phase)
 
         dsets_loader = {}
         dsets_loader['train'] = torch.utils.data.DataLoader(dsets['train'],

@@ -28,7 +28,7 @@ class TestModule(object):
 
         dataset_module = self.dataset
         test_dir = os.path.join(args.data_dir, args.test_txt)
-        dsets_test = dataset_module(annotation_lines=test_dir)
+        dsets_test = dataset_module(annotation_lines=test_dir, phase=args.phase)
         dsets_loader = DataLoader(dsets_test,
                                   batch_size=1,
                                   shuffle=False,

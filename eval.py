@@ -26,7 +26,7 @@ class EvalModule(object):
 
         dataset_module = self.dataset
         eval_dir = os.path.join(args.data_dir, args.test_txt)
-        dsets_eval = dataset_module(annotation_lines=eval_dir)
+        dsets_eval = dataset_module(annotation_lines=eval_dir, phase=args.phase)
         dsets_loader = DataLoader(dsets_eval,
                                   batch_size=1,
                                   shuffle=False,
