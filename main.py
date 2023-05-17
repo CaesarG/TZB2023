@@ -46,6 +46,7 @@ if __name__ == '__main__':
         if args.model == 'Alexnet':
             model = DPAAlexNet(num_classes=num_classes)
         else:
+            # VGG模型还未加入DPA模块
             # 需要使用使用vgg的何种模型就将moedl_name后面修改成何种(如vgg16)，同时torch.load的权值文件也要替换为相应模型
             model = vgg(model_name='vgg11', num_classes=num_classes, init_weights=True)
             pretrained_dict = torch.load('model/pretrain_wight/vgg11-bbd30ac9.pth')  # 加载预训练权重模型(.pth文件)参数
