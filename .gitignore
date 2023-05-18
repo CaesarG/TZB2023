@@ -129,9 +129,10 @@ dmypy.json
 .pyre/
 
 .idea/
-dataRCS/
+/dataRCS*/*
+!/dataRCS/annotations/
+/annotations/
 weight_of_model/
 结构.pptx
-ceshi.py
-ceshi.py
-model/pretrain_wight/
+ceshi.*
+model/pretrain_weight/*

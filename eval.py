@@ -19,7 +19,7 @@ class EvalModule(object):
         return model
 
     def eval_network(self, args):
-        weight_path = r'D:\TZB2023\weight_of_model'
+        weight_path = r'weight_of_model'
         self.model = self.load_model(self.model, os.path.join(weight_path, args.resume))    # 载入训练模型权值
         self.model = self.model.to(self.device)    # 将模型载入GPU
         self.model.eval()
@@ -38,23 +38,25 @@ class EvalModule(object):
         pr_conf_sum = 0
         false_conf_sum = 0
         softmax = nn.Softmax(dim=1)
-        for cnt, data in enumerate(dsets_loader):
-            data_rcs = data[0]
-            gt = data[1]
-            data_rcs = data_rcs.to(device=self.device, non_blocking=True)
-            pr_decs = self.model(data_rcs)
-            pr_decs = softmax(pr_decs)
-            pr_decs = pr_decs.squeeze()
-            pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)
-            pr_result = pr_sort_index[0]
-            pr_conf = pr_decs[pr_result]
-            if pr_result == gt:
-                correct_num += 1
-                pr_conf_sum += pr_conf
-            else:
-                false_conf_sum += pr_conf
-            # set_trace()
-            print('evaluating schedule: {0:d}/{1:d}'.format(cnt+1, len_dsets))    # 打印eval进度
+        with torch.no_grad():
+            for cnt, data in enumerate(dsets_loader):
+                data_rcs = data[0]
+                gt = data[1]
+                data_rcs = data_rcs.to(device=self.device, non_blocking=True)
+                pr_decs = self.model(data_rcs)
+                pr_decs = softmax(pr_decs)
+                pr_decs = pr_decs.squeeze()
+                pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)
+                pr_result = pr_sort_index[0]
+                pr_conf = pr_decs[pr_result]
+                if pr_result == gt:
+                    correct_num += 1
+                    pr_conf_sum += pr_conf
+                else:
+                    false_conf_sum += pr_conf
+                # set_trace()
+                print('evaluating schedule: {0:d}/{1:d}'.format(cnt+1, len_dsets))    # 打印eval进度
+
         accuracy = correct_num/len_dsets*100
         avg_pr_conf = pr_conf_sum/correct_num
         avg_false_conf = false_conf_sum/(len_dsets-correct_num)
