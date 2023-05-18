@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .DPAtention import Dpatention
+from .Attention import Dpattention
 
 
 class DPAAlexNet(nn.Module):
@@ -22,7 +22,7 @@ class DPAAlexNet(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))    # 没有使用驼峰命名法，所以出现绿色波浪线并提示Typo: In word 'avgpool'
-        self.DPAttention = Dpatention(in_channel=256, groups=4)
+        self.DPAttention = Dpattention(in_channel=256, groups=4)
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(256 * 6 * 6, 4096),

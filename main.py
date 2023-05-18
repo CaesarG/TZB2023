@@ -33,6 +33,7 @@ def parse_args():
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
                                                                          'for test or eval')
     parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval}')
+    parser.add_argument('--CA', action="store_true", default='False', help='Whether to use CA Attention')
     # parser.add_argument('--conf_thresh', type=float, default=0.3, help='Confidence thresh hold')
     args = parser.parse_args()
     return args
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         else:
             # VGG模型还未加入DPA模块
             # 需要使用使用vgg的何种模型就将moedl_name后面修改成何种(如vgg16)，同时torch.load的权值文件也要替换为相应模型
-            model = vgg(model_name='vgg11', num_classes=num_classes, init_weights=True)
+            model = vgg(model_name='vgg11', num_classes=num_classes, init_weights=True, CA=args.CA)
             pretrained_dict = torch.load('model/pretrain_weight/vgg11-bbd30ac9.pth')  # 加载预训练权重模型(.pth文件)参数
             model_dict = model.state_dict()  # 得到模型的参数字典
 

@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+from .Attention import CA_BLOCK
 
 # official pretrain weights
 model_urls = {
@@ -11,11 +12,11 @@ model_urls = {
 
 
 class VGG(nn.Module):
-    def __init__(self, features, num_classes=1000, init_weights=False):
+    def __init__(self, features, num_classes=1000, init_weights=False, CA=False):
         super(VGG, self).__init__()
         self.features = features
         self.classifier = nn.Sequential(
-            nn.Linear(512*12*16, 4096),
+            nn.Linear(512 * 12 * 16, 4096),
             nn.ReLU(True),
             nn.Dropout(p=0.5),
             nn.Linear(4096, 4096),
@@ -23,6 +24,8 @@ class VGG(nn.Module):
             nn.Dropout(p=0.5),
             nn.Linear(4096, num_classes)
         )
+        if CA:
+            self.CA = CA_BLOCK(512)
         if init_weights:
             self._initialize_weights()
 
@@ -30,6 +33,7 @@ class VGG(nn.Module):
         # N x 3 x 224 x 224
         x = self.features(x)
         # N x 512 x 7 x 7
+        x = self.CA(x)
         x = torch.flatten(x, start_dim=1)
         # N x 512*7*7
         x = self.classifier(x)
@@ -50,7 +54,7 @@ class VGG(nn.Module):
 
 def make_features(cfg: list):
     layers = []
-    in_channels = 2   # 初始输入通道为2
+    in_channels = 2  # 初始输入通道为2
     for v in cfg:
         if v == "M":
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
