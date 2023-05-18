@@ -8,7 +8,7 @@ from IPython.core.debugger import set_trace
 self.annotation_lines为一个数组，每一个元素记录原标签txt一行的字符串。
 """
 class myDataset_4(Dataset):
-    def __init__(self, annotation_lines, phase):
+    def __init__(self, phase, annotation_lines):
         super(myDataset_4, self).__init__()
         with open(annotation_lines, 'r') as f:
             self.annotation_lines = f.readlines()

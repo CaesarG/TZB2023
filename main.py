@@ -6,6 +6,7 @@ import eval
 from dataset.dataset import myDataset
 from dataset.dataset_4 import myDataset_4
 from dataset.dataset_ifft import myDataset_ifft
+from dataset.dataset_ifft_4 import myDataset_ifft_4
 from model.DPA_Alexnet import DPAAlexNet
 from model.DPA_Alexnet_4channel import DPAAlexNet_4channel
 from model.vgg import vgg
@@ -69,8 +70,14 @@ if __name__ == '__main__':
         else:
             dataset = myDataset_ifft
     elif args.channel == 4:
-        dataset = myDataset_4
-        model = DPAAlexNet_4channel(num_classes=num_classes)
+        if args.ifft == 'False':
+            dataset = myDataset_4
+        else:
+            dataset = myDataset_ifft_4
+        if args.model == 'Alexnet':
+            model = DPAAlexNet_4channel(num_classes=num_classes)
+        else:
+            print('no 4 channel model for vgg temporarily')
     else:
         print('invalid num of channel')
 

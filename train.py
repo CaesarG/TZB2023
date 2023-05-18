@@ -65,7 +65,6 @@ class TrainModule(object):
     def train_network(self, args):
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
-        # self.optimizer = torch.optim.SGD(self.model.parameters(), args.init_lr,momentum=0.9)
         save_path = args.weight_save
         start_epoch = 1
 
@@ -78,11 +77,8 @@ class TrainModule(object):
             start_epoch = start_epoch+1
         # end
 
-        # 指数下降
-        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
-        # 余弦退火
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=5, T_mult=2,
-                                                                              eta_min=0, last_epoch=- 1, verbose=False)
+        # TODO 学习率方案更改尝试，待完成
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
@@ -96,7 +92,7 @@ class TrainModule(object):
         criterion = bce_loss  # 使用交叉熵损失函数
         print('Setting up data...')
 
-        # TODO 编写用于rcs的dataset，待完成
+        # TODO 编写用于rcs的dataset
         dsets = {}
         dataset_module = self.dataset
         train_dir = args.data_dir + '/train.txt'
@@ -160,14 +156,13 @@ class TrainModule(object):
                        header='train_loss / val_loss')
 
 
-    # TODO 根绝dataset和dataloader的取样方式，编写合适的训练代码，暂且按照：标签+一维距离像图的格式
+
     def run_epoch(self, phase, data_loader, criterion):
         if phase == 'train':
             self.model.train()
         else:
             self.model.eval()
         running_loss = 0.
-        # TODO 修改data_loader结构
         for data, gt in data_loader:
             gt = gt.to(device=self.device, non_blocking=True)    # non_blocking一般与dataloader的pin_memory为True时为True
                                                                  # 配对使用。用以加速。
@@ -178,13 +173,12 @@ class TrainModule(object):
                     pr_decs = self.model(data)
                     # set_trace()
                     loss = criterion(pr_decs, gt)    # 返回的loss为一个tensor
-                    loss.backward()    # TODO 有报错——RuntimeError: CUDA error: device-side assert triggered
+                    loss.backward()
                     self.optimizer.step()
             else:
                 with torch.no_grad():
                     pr_decs = self.model(data)
                     loss = criterion(pr_decs, gt)
-        # TODO 修改至此结束
 
             running_loss += loss.item()
         epoch_loss = running_loss / len(data_loader)
