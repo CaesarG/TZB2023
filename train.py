@@ -65,6 +65,7 @@ class TrainModule(object):
     def train_network(self, args):
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
+        # self.optimizer = torch.optim.SGD(self.model.parameters(), args.init_lr,momentum=0.9)
         save_path = args.weight_save
         start_epoch = 1
 
@@ -77,7 +78,11 @@ class TrainModule(object):
             start_epoch = start_epoch+1
         # end
 
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
+        # 指数下降
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
+        # 余弦退火
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=5, T_mult=2,
+                                                                              eta_min=0, last_epoch=- 1, verbose=False)
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
