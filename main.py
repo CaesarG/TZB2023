@@ -17,7 +17,8 @@ from IPython.core.debugger import set_trace
 import random
 import timm
 import torch.nn as nn
-# from timm.models.vision_transformer import *
+from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from timm.models.vision_transformer import PatchEmbed
 # from timm.models.resnet import *
 
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD, IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD
@@ -97,6 +98,8 @@ if __name__ == '__main__':
             # 加载我们真正需要的 state_dict
             model.load_state_dict(model_dict, strict=False)
         elif args.model == 'autoformer':
+            # todo: need to add model config for each model however the config is not necessary
+            # unless vit is used
             update_config_from_file(args.cfg)
             choices = {'num_heads': cfg.SEARCH_SPACE.NUM_HEADS, 'mlp_ratio': cfg.SEARCH_SPACE.MLP_RATIO,
                     'embed_dim': cfg.SEARCH_SPACE.EMBED_DIM , 'depth': cfg.SEARCH_SPACE.DEPTH}
@@ -119,7 +122,16 @@ if __name__ == '__main__':
             model.cuda()
         elif args.model == 'resnet':
             model = timm.create_model('resnet50',pretrained=False,num_classes=10)
-            print(model)
+            model.conv1=nn.Conv2d(2,64,kernel_size=(3,3),stride=(1,1),padding=(3,3),bias=False)
+            model.cuda()
+        elif args.model == 'vit':
+            model = timm.create_model('vit_small_patch16_224',pretrained=False,num_classes=10)
+            model.patch_embed.proj=nn.Conv2d(2,768,kernel_size=(16,16),stride=(16,16))
+            model.patch_embed.img_size=(401,512)
+            model.patch_embed.num_patches = (401// 16) * (512 // 16)
+            model.patch_embed=PatchEmbed((401,512),16,2,model.embed_dim)
+            model.pos_embed = nn.Parameter(torch.zeros(1, model.patch_embed.num_patches + 1, model.embed_dim))
+
         # 是否ifft
         if args.ifft == 'False':
             dataset = myDataset
