@@ -20,7 +20,7 @@ class TestModule(object):
         return model
 
     def test_network(self, args):
-        weight_path = r'D:\TZB\Alexnet\weight_of_model'
+        weight_path = '/home/kaliy/Desktop/TZB2023-main/weight_of_model'
         self.model = self.load_model(self.model, os.path.join(weight_path, args.resume))    # 载入训练模型权值
         self.model = self.model.to(self.device)    # 将模型载入GPU
         self.model.eval()
@@ -28,14 +28,14 @@ class TestModule(object):
 
         dataset_module = self.dataset
         test_dir = os.path.join(args.data_dir, args.test_txt)
-        dsets_test = dataset_module(annotation_lines=test_dir, phase=args.phase)
+        dsets_test = dataset_module(annotation_lines=test_dir)
         dsets_loader = DataLoader(dsets_test,
                                   batch_size=1,
                                   shuffle=False,
                                   num_workers=args.num_workers,
                                   pin_memory=True,
                                   drop_last=True)
-        save_dir = r'D:\TZB\Alexnet\test_results'
+        save_dir = '/home/kaliy/Desktop/TZB2023-main/test_results'
         pr_results = np.array([])
         pr_confs = np.array([])
         gts = np.array([])
@@ -50,7 +50,7 @@ class TestModule(object):
             pr_decs = pr_decs.squeeze()
             pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)
             pr_result = pr_sort_index[0]
-            pr_conf = pr_decs[pr_result]
+            pr_conf = pr_decs[pr_result].cpu().detach().numpy()
             # set_trace()    # debug时使用
             pr_results = np.append(pr_results, pr_result)
             pr_confs = np.append(pr_confs, pr_conf)

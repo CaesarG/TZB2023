@@ -33,7 +33,7 @@ class VGG(nn.Module):
         # N x 3 x 224 x 224
         x = self.features(x)
         # N x 512 x 7 x 7
-        # x = self.CA(x)
+        x = self.CA(x)
         x = torch.flatten(x, start_dim=1)
         # N x 512*7*7
         x = self.classifier(x)
@@ -52,18 +52,12 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_features(cfg, CA):
+def make_features(cfg: list):
     layers = []
     in_channels = 2  # 初始输入通道为2
-    for i, v in enumerate(cfg):
+    for v in cfg:
         if v == "M":
-            if CA:
-                layers += [CA_BLOCK(cfg[i - 1])]
-                # conv2d = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1,stride=2)
-                # layers += [conv2d, nn.ReLU(True)]
-                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-            else:
-                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
             layers += [conv2d, nn.ReLU(True)]
@@ -83,5 +77,5 @@ def vgg(model_name="vgg16", **kwargs):
     assert model_name in cfgs, "Warning: model number {} not in cfgs dict!".format(model_name)
     cfg = cfgs[model_name]
 
-    model = VGG(make_features(cfg, kwargs['CA']), **kwargs)
+    model = VGG(make_features(cfg), **kwargs)
     return model

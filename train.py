@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from loss import bce_loss
-from focal_loss import FocalLoss
 from IPython.core.debugger import set_trace
 
 
@@ -77,11 +76,8 @@ class TrainModule(object):
                                                                       strict=True)
             start_epoch = start_epoch+1
         # end
-        # set_trace()
 
-        # TODO 学习率方案更改尝试，待完成
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=5, T_mult=2,
-                                                                              eta_min=0, last_epoch=- 1, verbose=False)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
@@ -90,20 +86,19 @@ class TrainModule(object):
                 print("Let's use", torch.cuda.device_count(), "GPUs!")
                 # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
                 self.model = nn.DataParallel(self.model)
+                
         self.model.to(self.device)    # 将模型载入GPU
 
-        # TODO 损失函数更改观察效果
         criterion = bce_loss  # 使用交叉熵损失函数
-        # criterion = FocalLoss(class_num=args.num_classes, gamma=5)  # 使用focal loss损失函数
-
         print('Setting up data...')
 
+        # TODO 编写用于rcs的dataset，待完成
         dsets = {}
         dataset_module = self.dataset
         train_dir = args.data_dir + '/train.txt'
         val_dir = args.data_dir + '/val.txt'
-        dsets['train'] = dataset_module(annotation_lines=train_dir, phase=args.phase)
-        dsets['val'] = dataset_module(annotation_lines=val_dir, phase=args.phase)
+        dsets['train'] = dataset_module(annotation_lines=train_dir)
+        dsets['val'] = dataset_module(annotation_lines=val_dir)
 
         dsets_loader = {}
         dsets_loader['train'] = torch.utils.data.DataLoader(dsets['train'],
@@ -120,6 +115,7 @@ class TrainModule(object):
                                                             num_workers=args.num_workers,
                                                             pin_memory=True,
                                                             drop_last=True)
+        # TODO dataset部分到此结束
 
         print('Starting training...')
         train_loss = np.array([])
@@ -160,13 +156,14 @@ class TrainModule(object):
                        header='train_loss / val_loss')
 
 
-
+    # TODO 根绝dataset和dataloader的取样方式，编写合适的训练代码，暂且按照：标签+一维距离像图的格式
     def run_epoch(self, phase, data_loader, criterion):
         if phase == 'train':
             self.model.train()
         else:
             self.model.eval()
         running_loss = 0.
+        # TODO 修改data_loader结构
         for data, gt in data_loader:
             gt = gt.to(device=self.device, non_blocking=True)    # non_blocking一般与dataloader的pin_memory为True时为True
                                                                  # 配对使用。用以加速。
@@ -177,12 +174,13 @@ class TrainModule(object):
                     pr_decs = self.model(data)
                     # set_trace()
                     loss = criterion(pr_decs, gt)    # 返回的loss为一个tensor
-                    loss.backward()
+                    loss.backward()    # TODO 有报错——RuntimeError: CUDA error: device-side assert triggered
                     self.optimizer.step()
             else:
                 with torch.no_grad():
                     pr_decs = self.model(data)
                     loss = criterion(pr_decs, gt)
+        # TODO 修改至此结束
 
             running_loss += loss.item()
         epoch_loss = running_loss / len(data_loader)

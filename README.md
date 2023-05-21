@@ -56,11 +56,6 @@ python main.py --phase train --channel 2 --model Alexnet --ifft False --batch_si
 ## 2通道指标测试指令：
 python main.py --phase eval --channel 2 --model Alexnet --ifft False --batch_size 16 --resume path(比如model_24.pth) 
 --test_txt test.txt
-## 4通道ifft训练指令：
-python main.py --phase train --channel 4 --model Alexnet --ifft True --batch_size 8
-## 4通道ifft指标测试指令：
-python main.py --phase eval --channel 4 --model Alexnet --ifft True --batch_size 8 --resume path(比如model_24.pth) 
---test_txt test.txt
 ## 4通道训练指令：
 python main.py --phase train --channel 4 --model Alexnet --ifft False --batch_size 8
 ## 4通道指标测试指令：
