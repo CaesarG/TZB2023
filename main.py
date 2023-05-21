@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
                                                                          'for test or eval')
     parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval}')
-    parser.add_argument('--CA', action="store_true", default='False', help='Whether to use CA Attention')
+    parser.add_argument('--CA', action="store_true", default=False, help='Whether to use CA Attention')
     # parser.add_argument('--conf_thresh', type=float, default=0.3, help='Confidence thresh hold')
     args = parser.parse_args()
     return args

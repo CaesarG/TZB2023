@@ -52,7 +52,7 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_features(cfg, CA=False):
+def make_features(cfg, CA):
     layers = []
     in_channels = 2  # 初始输入通道为2
     for i, v in enumerate(cfg):
