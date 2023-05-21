@@ -56,7 +56,7 @@ Autoformer:<br>
 python main.py --phase train --channel 2 --model autoformer --ifft True --batch_size 16 --cfg ./experiments/supernet/supernet-T.yaml
 
 Effcientnet:<br>
-python main.py --phase train --channel 2 --model autoformer --ifft True --batch_size 16 --cfg ./experiments/supernet/supernet-T.yaml
+python main.py --phase train --channel 2 --model effcientnet --ifft True --batch_size 16 --cfg ./experiments/supernet/supernet-T.yaml
 ## 2通道abs训练指令：
 python main.py --phase train --channel 2 --model Alexnet --ifft False --batch_size 16
 ## 2通道指标测试指令：
