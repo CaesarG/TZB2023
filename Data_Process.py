@@ -36,12 +36,12 @@ class CustomDataset(Dataset):
 
     def load_data_EvEh(self,class_idx,frame_idx):
         # get the name of mat file
-        mat_name=self.path_cwd+'\\'+'DATA_02\\'+str(class_idx)+'\\'+'frame_'+str(frame_idx)+'.mat'
+        mat_name=self.path_cwd+'/'+'dataRCS/'+str(class_idx)+'/'+'frame_'+str(frame_idx)+'.mat'
         mat_data=sciio.loadmat(mat_name)
         # self.data_Ev=np.abs(mat_data['frame_Ev'])
         # self.data_Eh=np.abs(mat_data['frame_Eh'])    
-        self.data_Ev_fft_abs=np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Ev'],dtype='complex').T)))
-        self.data_Eh_fft_abs=np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Eh'],dtype='complex').T)))
+        self.data_Ev_fft_abs=np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Ev'],dtype='complex').T))))
+        self.data_Eh_fft_abs=np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Eh'],dtype='complex').T))))
     
     def get_idx(self):
         return self.class_idx,self.frame_idx
