@@ -138,3 +138,4 @@ ceshi.*
 model/pretrain_weight/*
 /RESULTS/
 /data*/
+!/dataset/
