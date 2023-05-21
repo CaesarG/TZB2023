@@ -136,3 +136,5 @@ weight_of_model/
 结构.pptx
 ceshi.*
 model/pretrain_weight/*
+/RESULTS/
+/data*/
