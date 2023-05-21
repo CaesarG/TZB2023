@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import scipy.io as sciio
 import numpy as np
+import cv2
 from IPython.core.debugger import set_trace
 
 """
@@ -30,9 +31,22 @@ class myDataset_ifft(Dataset):
         data_rcs = sciio.loadmat(path_rcs)    # sciio加载的每帧mat数据为一个字典
         data_Ev = data_rcs['frame_Ev'].astype(np.complex)
         data_Eh = data_rcs['frame_Eh'].astype(np.complex)
+        # set_trace()
 
         ifft_Ev = np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T))).astype(np.float32)
         ifft_Eh = np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T))).astype(np.float32)
+
+        # TODO 先将ifft数据归一化然后进行直方图均衡增大对比度
+        # 以两种极化方式的最大值为参考归一化
+        # 转图像255
+        ifft_max = np.max([ifft_Ev, ifft_Eh])
+        ifft_Ev = (ifft_Ev / ifft_max * 255).astype(np.uint8)
+        ifft_Eh = (ifft_Eh / ifft_max * 255).astype(np.uint8)
+        # 直方图均衡+归一化
+        ifft_Ev = cv2.equalizeHist(ifft_Ev).astype(np.float32)
+        ifft_Eh = cv2.equalizeHist(ifft_Eh).astype(np.float32)
+        # set_trace()
+        # TODO
 
         rcs_ifft = np.concatenate((np.expand_dims(ifft_Ev.T, axis=0), np.expand_dims(ifft_Eh.T, axis=0)), axis=0)
 
@@ -41,7 +55,6 @@ class myDataset_ifft(Dataset):
                 rcs_ifft = rcs_ifft[:, :, ::-1]    # 如果是训练集，则作数据增强，将512维度进行倒序翻转
                 rcs_ifft = np.ascontiguousarray(rcs_ifft)  # 经上一步操作之后，numpy的地址不连续，转为tensor会报错，将numpy转为连续
 
-        # set_trace()
         del ifft_Ev
         del ifft_Eh
         # 合并成2x401x512

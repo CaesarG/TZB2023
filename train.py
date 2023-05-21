@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from loss import bce_loss
+from focal_loss import FocalLoss
 from IPython.core.debugger import set_trace
 
 
@@ -76,9 +77,11 @@ class TrainModule(object):
                                                                       strict=True)
             start_epoch = start_epoch+1
         # end
+        # set_trace()
 
         # TODO 学习率方案更改尝试，待完成
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=5, T_mult=2,
+                                                                              eta_min=0, last_epoch=- 1, verbose=False)
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
@@ -89,10 +92,12 @@ class TrainModule(object):
                 self.model = nn.DataParallel(self.model)
         self.model.to(self.device)    # 将模型载入GPU
 
+        # TODO 损失函数更改观察效果
         criterion = bce_loss  # 使用交叉熵损失函数
+        # criterion = FocalLoss(class_num=args.num_classes, gamma=5)  # 使用focal loss损失函数
+
         print('Setting up data...')
 
-        # TODO 编写用于rcs的dataset
         dsets = {}
         dataset_module = self.dataset
         train_dir = args.data_dir + '/train.txt'
@@ -115,7 +120,6 @@ class TrainModule(object):
                                                             num_workers=args.num_workers,
                                                             pin_memory=True,
                                                             drop_last=True)
-        # TODO dataset部分到此结束
 
         print('Starting training...')
         train_loss = np.array([])

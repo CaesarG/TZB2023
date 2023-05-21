@@ -31,31 +31,29 @@ class myDataset_ifft_4(Dataset):
         data_Ev = data_rcs['frame_Ev'].astype(np.complex)
         data_Eh = data_rcs['frame_Eh'].astype(np.complex)
 
-        ifft_Ev = np.fft.ifftshift(np.fft.ifft(data_Ev.T))
-        ifft_Eh = np.fft.ifftshift(np.fft.ifft(data_Eh.T))
-        Ev_real = np.real(ifft_Ev).astype(np.float32)
-        Ev_imag = np.imag(ifft_Ev).astype(np.float32)
-        Eh_real = np.real(ifft_Eh).astype(np.float32)
-        Eh_imag = np.imag(ifft_Eh).astype(np.float32)
-        # set_trace()
+        # TODO 直接把极化角方位角信息加入
+        data_ElevationDegree = data_rcs['frame_ElevationDegree'].astype(np.float32)  # [1,512]
+        data_ElevationDegree = np.repeat(data_ElevationDegree, 401, axis=0)
+        data_AzimuthDegree = data_rcs['frame_AzimuthDegree'].astype(np.float32)
+        data_AzimuthDegree = np.repeat(data_AzimuthDegree, 401, axis=0)
 
-        ifft_2_channel = np.concatenate((np.expand_dims(Ev_real.T, axis=0), np.expand_dims(Ev_imag.T, axis=0)), axis=0)
-        ifft_3_channel = np.concatenate((ifft_2_channel, np.expand_dims(Eh_real.T, axis=0)), axis=0)
-        ifft_4_channel = np.concatenate((ifft_3_channel, np.expand_dims(Eh_imag.T, axis=0)), axis=0)
+        ifft_Ev = np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T))).astype(np.float32)
+        ifft_Eh = np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T))).astype(np.float32)
+
+        # TODO 先将ifft数据归一化然后进行直方图均衡增大对比度
+
+        #
+
+        rcs_ifft = np.concatenate((np.expand_dims(ifft_Ev.T, axis=0), np.expand_dims(ifft_Eh.T, axis=0)), axis=0)
+        rcs_ifft = np.concatenate((rcs_ifft, np.expand_dims(data_ElevationDegree, axis=0)), axis=0)
+        rcs_ifft = np.concatenate((rcs_ifft, np.expand_dims(data_AzimuthDegree, axis=0)), axis=0)
 
         if phase == 'train':
             if np.random.random() > 0.5:
-                ifft_4_channel = ifft_4_channel[:, :, ::-1]    # 如果是训练集，则作数据增强，将512维度进行倒序翻转
-                ifft_4_channel = np.ascontiguousarray(ifft_4_channel)  # 经上一步操作之后，numpy的地址不连续，转为tensor会报错，将numpy转为连续
+                rcs_ifft = rcs_ifft[:, :, ::-1]  # 如果是训练集，则作数据增强，将512维度进行倒序翻转
+                rcs_ifft = np.ascontiguousarray(rcs_ifft)  # 经上一步操作之后，numpy的地址不连续，转为tensor会报错，将numpy转为连续
 
         del ifft_Ev
         del ifft_Eh
-        del Ev_real
-        del Ev_imag
-        del Eh_real
-        del Eh_imag
-        del ifft_2_channel
-        del ifft_3_channel
-
         # 合并成2x401x512
-        return ifft_4_channel, ground_truth
+        return rcs_ifft, ground_truth
