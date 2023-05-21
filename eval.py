@@ -2,6 +2,7 @@ import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+import numpy as np
 from IPython.core.debugger import set_trace
 
 
@@ -38,6 +39,8 @@ class EvalModule(object):
         pr_conf_sum = 0
         false_conf_sum = 0
         softmax = nn.Softmax(dim=1)
+        Confusion_Matrix = np.zeros([10, 10])    # 混淆矩阵，第一维对应真实值，第二维对应预测值
+        confusion_cnt = np.zeros(10)    # 对每个类别进行计数
         with torch.no_grad():
             for cnt, data in enumerate(dsets_loader):
                 data_rcs = data[0]
@@ -46,9 +49,12 @@ class EvalModule(object):
                 pr_decs = self.model(data_rcs)
                 pr_decs = softmax(pr_decs)
                 pr_decs = pr_decs.squeeze()
-                pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)
+                pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)    # 降序排列预测结果
                 pr_result = pr_sort_index[0]
                 pr_conf = pr_decs[pr_result]
+
+                confusion_cnt[gt] += 1
+                Confusion_Matrix[gt][pr_result] += 1
                 if pr_result == gt:
                     correct_num += 1
                     pr_conf_sum += pr_conf
@@ -63,4 +69,7 @@ class EvalModule(object):
         print('The accuracy of classification is:\n{0:f}'.format(accuracy))
         print('The average correct prediction confidence is:\n{0:f}'.format(avg_pr_conf))
         print('The average false prediction confidence is:\n{0:f}'.format(avg_false_conf))
+        for i in range(len(confusion_cnt)):
+            Confusion_Matrix[i] = Confusion_Matrix[i] / confusion_cnt[i]
+        print(Confusion_Matrix)
         return 0

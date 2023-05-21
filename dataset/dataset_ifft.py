@@ -39,12 +39,15 @@ class myDataset_ifft(Dataset):
         # TODO 先将ifft数据归一化然后进行直方图均衡增大对比度
         # 以两种极化方式的最大值为参考归一化
         # 转图像255
-        ifft_max = np.max([ifft_Ev, ifft_Eh])
-        ifft_Ev = (ifft_Ev / ifft_max * 255).astype(np.uint8)
-        ifft_Eh = (ifft_Eh / ifft_max * 255).astype(np.uint8)
+        ifft_Ev_max = np.max(ifft_Ev)
+        ifft_Eh_max = np.max(ifft_Eh)
+        ifft_Ev = (ifft_Ev / ifft_Ev_max * 255).astype(np.uint8)
+        ifft_Eh = (ifft_Eh / ifft_Eh_max * 255).astype(np.uint8)
         # 直方图均衡+归一化
         ifft_Ev = cv2.equalizeHist(ifft_Ev).astype(np.float32)
         ifft_Eh = cv2.equalizeHist(ifft_Eh).astype(np.float32)
+        ifft_Ev = ifft_Ev*ifft_Ev_max/255
+        ifft_Eh = ifft_Eh*ifft_Eh_max/255
         # set_trace()
         # TODO
 
