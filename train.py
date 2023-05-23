@@ -131,8 +131,8 @@ class TrainModule(object):
             self.scheduler.step()    # 更新学习率 self.scheduler.step(epoch)
 
             # if epoch % 5 == 0 or epoch > 20:    # 存储权值文件
-            if epoch % 3 == 0:
-                self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
+            # if epoch % 3 == 0:
+            self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
                                 epoch,
                                 self.model,
                                 self.optimizer)

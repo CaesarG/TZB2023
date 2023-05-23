@@ -137,5 +137,10 @@ weight_of_model/
 ceshi.*
 model/pretrain_weight/*
 /RESULTS/
-/data*/
-!/dataset/
+/data/
+/data2/
+/data_1/
+/DATA_02/*
+!/DATA_02/annotations/
+*.pdf
+*.zip
