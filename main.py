@@ -21,7 +21,7 @@ from timm.models.vision_transformer import PatchEmbed
 
 from model.effnetv2 import effnetv2_s
 # from timm.models.resnet import *
-
+# from
 
 def sample_configs(choices):
 
