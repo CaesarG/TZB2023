@@ -21,8 +21,8 @@ from timm.models.vision_transformer import PatchEmbed
 
 from model.effnetv2 import effnetv2_s
 # from timm.models.resnet import *
-# from
 
+ 
 def sample_configs(choices):
 
     config = {}
@@ -117,7 +117,7 @@ if __name__ == '__main__':
                                             change_qkv=args.change_qkv, abs_pos=not args.no_abs_pos)
             model.set_sample_config(config=config)
         elif args.model == 'efficientnet':
-            model = timm.create_model('efficientnet_b1', pretrained=True,num_classes=10)
+            model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=10)
             model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
         elif args.model == 'resnet':
             model = timm.create_model('resnet50',pretrained=False,num_classes=10)

@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import scipy.io as sciio
 import numpy as np
 from IPython.core.debugger import set_trace
-
+from dataset.data_process import pre_process
 """
 注：生成标签annotation_lines为txt格式，每一行对应一帧的数据，分别记录帧文件路径和该帧类别
 self.annotation_lines为一个数组，每一个元素记录原标签txt一行的字符串。
@@ -30,9 +30,10 @@ class myDataset_ifft(Dataset):
         data_Ev = data_rcs['frame_Ev'].astype(complex)
         data_Eh = data_rcs['frame_Eh'].astype(complex)
 
-        ifft_Ev = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T))).astype(np.float32))
-        ifft_Eh = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T))).astype(np.float32))
-
+        # ifft_Ev = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T))).astype(np.float32))
+        # ifft_Eh = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T))).astype(np.float32))
+        ifft_Ev = pre_process(data_Ev)
+        ifft_Eh = pre_process(data_Eh)
         rcs_ifft = np.concatenate((np.expand_dims(ifft_Ev.T, axis=0), np.expand_dims(ifft_Eh.T, axis=0)), axis=0)
 
         # set_trace()
