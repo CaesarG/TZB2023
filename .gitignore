@@ -143,6 +143,5 @@ model/pretrain_weight/*
 /data1/
 /DATA_02/*
 !/DATA_02/annotations/
-*.pdf
 *.zip
 *.pth
