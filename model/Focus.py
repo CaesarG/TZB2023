@@ -10,4 +10,4 @@ class Focus(nn.Module):
                               padding=0)
 
     def forward(self, x):  # x(b,c,w,h) -> y(b,2c,w,h/2)
-        return self.conv(torch.cat([x[..., :256], x[..., 256:]], 1))
+        return torch.cat([x[..., :256], x[..., 256:]], 1)

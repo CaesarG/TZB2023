@@ -38,7 +38,7 @@ class CustomDataset(Dataset):
 
     def load_data_EvEh(self,class_idx,frame_idx):
         # get the name of mat file
-        mat_name=self.path_cwd+'/'+'DATA_02/'+str(class_idx)+'/'+'frame_'+str(frame_idx)+'.mat'
+        mat_name=self.path_cwd+'/'+'dataRCS_2/'+str(class_idx)+'/'+'frame_'+str(frame_idx)+'.mat'
         mat_data=sciio.loadmat(mat_name)
         # self.data_Ev=np.abs(mat_data['frame_Ev'])
         # self.data_Eh=np.abs(mat_data['frame_Eh'])    

@@ -30,8 +30,8 @@ class myDataset_ifft(Dataset):
         data_Ev = data_rcs['frame_Ev'].astype(complex)
         data_Eh = data_rcs['frame_Eh'].astype(complex)
 
-        ifft_Ev = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T))).astype(np.float32))
-        ifft_Eh = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T))).astype(np.float32))
+        ifft_Ev = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Ev.T), axes=1)).astype(np.float32))
+        ifft_Eh = np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(data_Eh.T), axes=1)).astype(np.float32))
 
         rcs_ifft = np.concatenate((np.expand_dims(ifft_Ev.T, axis=0), np.expand_dims(ifft_Eh.T, axis=0)), axis=0)
 

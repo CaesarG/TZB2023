@@ -25,17 +25,17 @@ from model.Focus import Focus
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD, IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD
 
 
-def sample_configs(choices):
-    config = {}
-    dimensions = ['mlp_ratio', 'num_heads']
-    depth = random.choice(choices['depth'])
-    for dimension in dimensions:
-        config[dimension] = [random.choice(choices[dimension]) for _ in range(depth)]
-
-    config['embed_dim'] = [random.choice(choices['embed_dim'])] * depth
-
-    config['layer_num'] = depth
-    return config
+def getEfficientNet():
+    model = timm.create_model('efficientnet_b0', pretrained=True, num_classes=10)
+    if args.Focus:
+        print("Focused!")
+        layer = [Focus(2), nn.Conv2d(in_channels=4, out_channels=32, kernel_size=(3, 3), stride=(1, 1),
+                                     padding=(1, 1), bias=False)]
+        model.conv_stem = nn.Sequential(*layer)
+    else:
+        model.conv_stem = nn.Conv2d(in_channels=2, out_channels=32, kernel_size=(3, 3), stride=(1, 1),
+                                    padding=(1, 1), bias=False)
+    return model
 
 
 def parse_args():
@@ -51,7 +51,8 @@ def parse_args():
     parser.add_argument('--ngpus', type=int, default=1, help='Number of gpus, ngpus>1 for multigpu')
     parser.add_argument('--resume_train', type=str, default='', help='Weights resumed in training/Absolute path')
     parser.add_argument('--resume', type=str, default='model_10.pth', help='Weights resumed testing and evaluation')
-    parser.add_argument('--weight_save', type=str, default='weight_of_model', help='Weights saved directory')
+    parser.add_argument('--weight_save', type=str, default='Cross_Validation/weight_of_model',
+                        help='Weights saved directory')
     parser.add_argument('--data_dir', type=str, default='dataRCS/annotations', help='Path of data and annotation '
                                                                                     'directory')
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
@@ -123,14 +124,7 @@ if __name__ == '__main__':
             #                                 change_qkv=args.change_qkv, abs_pos=not args.no_abs_pos).cuda()
             # model.set_sample_config(config=config)
         elif args.model == 'efficientnet':
-            model = timm.create_model('efficientnet_b0', pretrained=True, num_classes=10)
-            if args.Focus:
-                layer = [Focus(2), nn.Conv2d(in_channels=4, out_channels=32, kernel_size=(3, 3), stride=(1, 1),
-                                             padding=(1, 1), bias=False)]
-                model.conv_stem = nn.Sequential(*layer)
-            else:
-                model.conv_stem = nn.Conv2d(in_channels=2, out_channels=32, kernel_size=(3, 3), stride=(1, 1),
-                                            padding=(1, 1), bias=False)
+            model = getEfficientNet()
             model.cuda()
 
         elif args.model == 'resnet':
@@ -165,3 +159,13 @@ if __name__ == '__main__':
     elif args.phase == 'eval':
         rcs = eval.EvalModule(dataset=dataset, model=model)
         rcs.eval_network(args)
+    elif args.phase == 'cv':
+        WS = args.weight_save
+        DD = args.data_dir
+        for i in range(9):
+            model = getEfficientNet()
+            model.cuda()
+            rcs = train.TrainModule(dataset=dataset, model=model)
+            args.weight_save = WS + str(i)
+            args.data_dir = DD + str(i)
+            rcs.cross_validation(args, i)

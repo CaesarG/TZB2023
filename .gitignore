@@ -130,9 +130,9 @@ dmypy.json
 
 .idea/
 /dataRCS*/*
-!/dataRCS/annotations/
+!/dataRCS/annotations*/
 /annotations/
-weight_of_model/
+RESULTS/weight_of_model/
 结构.pptx
 ceshi.*
 model/pretrain_weight/*
@@ -140,7 +140,12 @@ model/pretrain_weight/*
 /data/
 /data2/
 /data_1/
-/DATA_02/*
-!/DATA_02/annotations/
+/dataRCS_2/*
+!/dataRCS_2/annotations*/
 *.pdf
 *.zip
+weight_of_model/*
+/data3/
+/data4/
+/data5/
+/Cross_Validation/*
