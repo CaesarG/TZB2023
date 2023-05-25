@@ -1,7 +1,7 @@
 import argparse
 import torch
 import torchvision
-# import train
+import train
 import train_plus
 import test
 import eval
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print('invalid num of channel')
 
     if args.phase == 'train':
-        rcs = train.TrainModule(dataset=dataset, model=model)
+        rcs = train_plus.TrainModule(dataset=dataset, model=model)
         rcs.train_network(args)
     elif args.phase == 'test':
         rcs = test.TestModule(dataset=dataset, model=model)
