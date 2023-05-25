@@ -5,8 +5,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from loss import bce_loss
 from IPython.core.debugger import set_trace
-
-
+from sam import SAM
+from utility.bypass_bn import enable_running_stats,disable_running_stats
+from utility.smooth_cross_entropy import smooth_crossentropy
 class TrainModule(object):
     def __init__(self, dataset, model):
         torch.manual_seed(317)
@@ -63,8 +64,10 @@ class TrainModule(object):
         return model, optimizer, epoch    # 此时的模型仍为CPU权值模型
 
     def train_network(self, args):
-
-        self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
+        base_optimizer = torch.optim.SGD  # define an optimizer for the "sharpness-aware" update
+        self.optimizer = SAM(self.model.parameters(), base_optimizer, lr=args.init_lr, momentum=0.9)
+        
+        # self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
         save_path = args.weight_save
         start_epoch = 1
 
@@ -90,6 +93,7 @@ class TrainModule(object):
         self.model.to(self.device)    # 将模型载入GPU
 
         criterion = bce_loss  # 使用交叉熵损失函数
+        # criterion = smooth_crossentropy # 使用交叉熵损失函数
         print('Setting up data...')
 
         # TODO 编写用于rcs的dataset，待完成
@@ -128,7 +132,7 @@ class TrainModule(object):
                                         data_loader=dsets_loader['train'],
                                         criterion=criterion)    # 进行一次epoch训练
             train_loss = np.append(train_loss, epoch_loss)    # 记录每次epoch损失值
-            self.scheduler.step()    # 更新学习率 self.scheduler.step(epoch)
+            
 
             # if epoch % 5 == 0 or epoch > 20:    # 存储权值文件
             # if epoch % 3 == 0:
@@ -146,7 +150,8 @@ class TrainModule(object):
                                             data_loader=dsets_loader['val'],
                                             criterion=criterion)  # 进行一次epoch训练
             val_loss = np.append(val_loss, epoch_val_loss)  # 记录每次epoch损失值
-
+            
+            self.scheduler.step()    # 更新学习率 self.scheduler.step(epoch)
             # set_trace()
 
             train_val_loss = np.concatenate([np.expand_dims(train_loss, axis=1), np.expand_dims(val_loss, axis=1)], axis=1)
@@ -171,11 +176,17 @@ class TrainModule(object):
             if phase == 'train':
                 self.optimizer.zero_grad()
                 with torch.enable_grad():
+                    enable_running_stats(self.model)
                     pr_decs = self.model(data)
                     # set_trace()
                     loss = criterion(pr_decs, gt)    # 返回的loss为一个tensor
                     loss.backward()    # TODO 有报错——RuntimeError: CUDA error: device-side assert triggered
-                    self.optimizer.step()
+                    self.optimizer.first_step(zero_grad=True)
+                    
+                    disable_running_stats(self.model)
+                    criterion(self.model(data), gt).backward()
+                    
+                    self.optimizer.second_step(zero_grad=True)
             else:
                 with torch.no_grad():
                     pr_decs = self.model(data)
