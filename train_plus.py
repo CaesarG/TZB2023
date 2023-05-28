@@ -97,10 +97,13 @@ class TrainModule(object):
         alpha = 10 #第二个调的地方5,10
         anchors = torch.diag(torch.Tensor([alpha for i in range(self.num_classes)]))
         self.set_anchors(anchors) 
-        base_optimizer = torch.optim.SGD  # define an optimizer for the "sharpness-aware" update
-        self.optimizer = SAM(self.model.parameters(), base_optimizer, lr=args.init_lr, momentum=0.9)
-        
-        # self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
+        if args.opt=='SAM':
+            self.is_two_step=True
+            base_optimizer = torch.optim.SGD  # define an optimizer for the "sharpness-aware" update
+            self.optimizer = SAM(self.model.parameters(), base_optimizer, lr=args.init_lr, momentum=0.9)
+        else:
+            self.is_two_step=False
+            self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
         save_path = args.weight_save
         start_epoch = 1
 
@@ -115,6 +118,8 @@ class TrainModule(object):
 
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
 
+        # self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=100)
+        
         if not os.path.exists(save_path):
             os.mkdir(save_path)
         if args.ngpus > 1:
@@ -221,15 +226,19 @@ class TrainModule(object):
                     # set_trace()
                     #loss = criterion(pr_decs, gt)    # 返回的loss为一个tensor
                     loss.backward()    # TODO 有报错——RuntimeError: CUDA error: device-side assert triggered
-                    # self.optimizer.step()
-                    self.optimizer.first_step(zero_grad=True) 
-                    disable_running_stats(self.model)
+                    
+                    if self.is_two_step:
+                        self.optimizer.first_step(zero_grad=True) 
+                        disable_running_stats(self.model)
                     # criterion(self.model(data), gt).backward() 
-                    sec_pr_decs = self.model(data)
-                    sec_dis = self.distance_classifier(sec_pr_decs)
-                    sec_loss,anchorloss,tupletloss=criterion(sec_dis,gt)
-                    sec_loss.backward()
-                    self.optimizer.second_step(zero_grad=True)                  
+                        sec_pr_decs = self.model(data)
+                        sec_dis = self.distance_classifier(sec_pr_decs)
+                        sec_loss,anchorloss,tupletloss=criterion(sec_dis,gt)
+                        sec_loss.backward()
+                        self.optimizer.second_step(zero_grad=True)  
+                    else:
+                        self.optimizer.step()
+                                        
                     train_loss += loss.item()
                     _, predicted = distance.min(1)
                     total += gt.size(0)

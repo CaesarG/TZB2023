@@ -19,8 +19,9 @@ import random
 import timm
 import torch.nn as nn
 from timm.models.vision_transformer import PatchEmbed
-
+# from timm.models.efficientnet import *
 from model.effnetv2 import effnetv2_s
+from model.efficientnet_pytorch import EfficientNet
 # from timm.models.resnet import *
 
  
@@ -67,6 +68,7 @@ def parse_args():
     parser.add_argument('--no_abs_pos', default='True', action='store_true')
     parser.add_argument('--gp', action='store_true')
     parser.add_argument('--change_qkv',default='True',action='store_true')
+    parser.add_argument('--opt',type=str,default='adam')
     # parser.add_argument('--conf_thresh', type=float, default=0.3, help='Confidence thresh hold')
     args = parser.parse_args()
     return args
@@ -118,8 +120,12 @@ if __name__ == '__main__':
                                             change_qkv=args.change_qkv, abs_pos=not args.no_abs_pos)
             model.set_sample_config(config=config)
         elif args.model == 'efficientnet':
-            model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=10)
-            model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
+            # model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=10)
+            # model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
+            model = EfficientNet.from_pretrained('efficientnet-b0',
+                                                 in_channels=2,
+                                                 num_classes=10)
+            # model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
         elif args.model == 'resnet':
             model = timm.create_model('resnet50',pretrained=False,num_classes=10)
             model.conv1=nn.Conv2d(2,64,kernel_size=(3,3),stride=(1,1),padding=(3,3),bias=False)

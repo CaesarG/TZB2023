@@ -32,8 +32,39 @@ swish + squeeze and excitation
 1x1 expansion Conv -> depthwise Conv -> Squeeze+excitation with residual
 
 ### SENet
-Squeeze and excitation
+Squeeze and excitation 
 
+global pooling->FC->ReLU->FC->scale with residual module
+
+https://blog.csdn.net/u014380165/article/details/78006626
+
+### 2.Efficient Net Architecture
+
+    blocks_args = [
+        'r1_k3_s11_e1_i32_o16_se0.25',
+        'r2_k3_s22_e6_i16_o24_se0.25',
+        'r2_k5_s22_e6_i24_o40_se0.25',
+        'r3_k3_s22_e6_i40_o80_se0.25',
+        'r3_k5_s11_e6_i80_o112_se0.25',
+        'r4_k5_s22_e6_i112_o192_se0.25',
+        'r1_k3_s11_e6_i192_o320_se0.25',
+    ]
+
+r-num_repeat,k-kernel_size,s-stride,e-expand_ratio,i-input_filters,o-output_filters,se-re_ratio
+
+Mbconv1->Do not expension,Conv from input_filters to output_filters
+Mbconv6->Expanse to 6*input_filters and project to output_filters
+
+
+### 3.CACLoss
+
+CACLoss=TupletLoss+AnchorLoss
+
+gamma=d(1-softmin(d))
+
+reject as unknow if min(gamma)>theta
+
+class i = argmin(gamma) if min(gamma)<theta
 ### 1-10
 存放1~10个类别的rcs数据，每个文件夹存放250帧的mat文件，每帧包含Ev,Eh两种极化接收方式，两种接收数据大小均为401x512，401对应8G到10GHz的采样点数，
 512对应不同方位角俯仰角的接收位置。
