@@ -32,6 +32,99 @@ VALID_MODELS = (
     'efficientnet-l2'
 )
 
+class BasicConv(nn.Module):
+    def __init__(self, in_planes, out_planes, kernel_size, stride=1, padding=0 \
+            , dilation=1, groups=1, relu=True, bn=True, bias=False):
+        super(BasicConv, self).__init__()
+        self.out_channels = out_planes
+        self.conv = nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size \
+                , stride=stride, padding=padding, dilation=dilation \
+                , groups=groups, bias=bias)
+        self.bn = nn.BatchNorm2d(out_planes,eps=1e-5, momentum=0.01 \
+                , affine=True) if bn else None
+        self.relu = nn.ReLU() if relu else None
+
+    def forward(self, x):
+        x = self.conv(x)
+        if self.bn is not None:
+            x = self.bn(x)
+        if self.relu is not None:
+            x = self.relu(x)
+        return x
+
+class Flatten(nn.Module):
+    def forward(self, x):
+        return x.view(x.size(0), -1)
+
+class ChannelGate(nn.Module):
+    def __init__(self, gate_channels, reduction_ratio=16 \
+            , pool_types=['avg', 'max']):
+        super(ChannelGate, self).__init__()
+        self.gate_channels = gate_channels
+        self.mlp = nn.Sequential(
+            Flatten(),
+            nn.Linear(gate_channels, gate_channels // reduction_ratio),
+            nn.ReLU(),
+            nn.Linear(gate_channels // reduction_ratio, gate_channels)
+            )
+        self.pool_types = pool_types
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.maxpool = nn.AdaptiveMaxPool2d(1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        channel_att_sum = None
+        for pool_type in self.pool_types:
+            if pool_type=='avg':
+                avg_pool = self.avgpool(x)
+                channel_att_raw = self.mlp( avg_pool )
+            elif pool_type=='max':
+                max_pool = self.maxpool(x)
+                channel_att_raw = self.mlp( max_pool )
+
+            if channel_att_sum is None:
+                channel_att_sum = channel_att_raw
+            else:
+                channel_att_sum = channel_att_sum + channel_att_raw
+
+        scale = self.sigmoid(channel_att_sum).unsqueeze(2) \
+                .unsqueeze(3).expand_as(x)
+        return x * scale
+
+
+class ChannelPool(nn.Module):
+    def forward(self, x):
+        return torch.cat( (torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1) \
+                .unsqueeze(1)), dim=1 )
+
+class SpatialGate(nn.Module):
+    def __init__(self):
+        super(SpatialGate, self).__init__()
+        kernel_size = 7
+        self.compress = ChannelPool()
+        self.spatial = BasicConv(2, 1, kernel_size, stride=1 \
+                , padding=(kernel_size-1) // 2, relu=False)
+        self.sigmoid = nn.Sigmoid()
+    def forward(self, x):
+        x_compress = self.compress(x)
+        x_out = self.spatial(x_compress)
+        scale = self.sigmoid(x_out) # broadcasting
+        return x * scale
+
+class CBAM(nn.Module):
+    def __init__(self, gate_channels, reduction_ratio=16 \
+            , pool_types=['avg', 'max'], no_spatial=False):
+        super(CBAM, self).__init__()
+        self.ChannelGate = ChannelGate(gate_channels, reduction_ratio, pool_types)
+        self.no_spatial=no_spatial
+        if not no_spatial:
+            self.SpatialGate = SpatialGate()
+    def forward(self, x):
+        x_out = self.ChannelGate(x)
+        if not self.no_spatial:
+            x_out = self.SpatialGate(x_out)
+        return x_out
+
 class SpatialGroupEnhance(nn.Module):
     def __init__(self, groups = 64):
         super(SpatialGroupEnhance, self).__init__()
@@ -71,14 +164,15 @@ class MBConvBlock(nn.Module):
         [3] https://arxiv.org/abs/1905.02244 (MobileNet v3)
     """
 
-    def __init__(self, block_args, global_params, image_size=None):
+    def __init__(self, block_args, global_params, image_size=None, atten=0):
         super().__init__()
         self._block_args = block_args
         self._bn_mom = 1 - global_params.batch_norm_momentum  # pytorch's difference from tensorflow
         self._bn_eps = global_params.batch_norm_epsilon
-        self.has_se = (self._block_args.se_ratio is not None) and (0 < self._block_args.se_ratio <= 1)
         self.id_skip = block_args.id_skip  # whether to use skip connection and drop connect
-        self.sge=SpatialGroupEnhance(64)
+        # Paramerters to control branch of attention
+        self.has_se = (self._block_args.se_ratio is not None) and (0 < self._block_args.se_ratio <= 1)
+        self.atten=atten            
 
         # Expansion phase (Inverted Bottleneck)
         inp = self._block_args.input_filters  # number of input channels
@@ -93,31 +187,54 @@ class MBConvBlock(nn.Module):
         # Depthwise convolution phase
         k = self._block_args.kernel_size
         s = self._block_args.stride
+        
         Conv2d = get_same_padding_conv2d(image_size=image_size)
         self._depthwise_conv1 = Conv2d(
             in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depthwise
             kernel_size=k, stride=s, bias=False)
 
-        self._depthwise_conv2 = Conv2d(
-            in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depthwise
-            kernel_size=round(k/2), stride=s, bias=False)
-        
-        self._depthwise_conv3 = Conv2d(
-            in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depthwise
-            kernel_size=(k+2), stride=s, bias=False)
-        self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
-        self._bn3 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
-        self._bn4 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
-        
+        # if atten==2 or atten==3:
+        #     Conv2d = get_same_padding_conv2d(image_size=image_size)
+        #     self._expand_conv = Conv2d(in_channels=inp, out_channels=oup, kernel_size=1, bias=False)
+        #     self._bn0 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)            
+
+
         image_size = calculate_output_image_size(image_size, s)
 
         # Squeeze and Excitation layer, if desired
         if self.has_se:
-            Conv2d = get_same_padding_conv2d(image_size=(1, 1))
-            num_squeezed_channels = max(1, int(self._block_args.input_filters * self._block_args.se_ratio))
-            self._se_reduce = Conv2d(in_channels=oup, out_channels=num_squeezed_channels, kernel_size=1)
-            self._se_expand = Conv2d(in_channels=num_squeezed_channels, out_channels=3*oup, kernel_size=1)
-            self._bn5 = nn.BatchNorm2d(num_features=num_squeezed_channels, momentum=self._bn_mom, eps=self._bn_eps)
+            if(atten==0):
+                self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                Conv2d = get_same_padding_conv2d(image_size=(1, 1))
+                num_squeezed_channels = max(1, int(self._block_args.input_filters * self._block_args.se_ratio))
+                self._se_reduce = Conv2d(in_channels=oup, out_channels=num_squeezed_channels, kernel_size=1)
+                self._se_expand = Conv2d(in_channels=num_squeezed_channels, out_channels=oup, kernel_size=1)
+        
+            elif(atten==1):
+                self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                Conv2d = get_same_padding_conv2d(image_size=(1, 1))
+                num_squeezed_channels = max(1, int(self._block_args.input_filters * self._block_args.se_ratio))
+                self._se_reduce = Conv2d(in_channels=oup, out_channels=num_squeezed_channels, kernel_size=1)
+                self._se_expand = Conv2d(in_channels=num_squeezed_channels, out_channels=3*oup, kernel_size=1)
+                Conv2d = get_same_padding_conv2d(image_size=image_size)
+                self._depthwise_conv2 = Conv2d(in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depthwise
+                                                kernel_size=round(k/2), stride=s, bias=False)
+                
+                self._depthwise_conv3 = Conv2d(in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depthwise
+                                                kernel_size=(k+2), stride=s, bias=False)
+                    
+
+                self._bn3 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                self._bn4 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                self._bn5 = nn.BatchNorm2d(num_features=num_squeezed_channels, momentum=self._bn_mom, eps=self._bn_eps)
+        
+            elif (atten==2):
+                self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                self.sge_cbam=SpatialGroupEnhance(self._block_args.expand_ratio*8)
+            elif (atten==3):
+                self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
+                self.sge_cbam=CBAM(oup,16)
+                ...
         # Pointwise convolution phase
         final_oup = self._block_args.output_filters
         Conv2d = get_same_padding_conv2d(image_size=image_size)
@@ -138,52 +255,76 @@ class MBConvBlock(nn.Module):
 
         # Expansion and Depthwise Convolution
         x = inputs
-        if self._block_args.expand_ratio != 1:
-            # Pointwise convolution
-            x = self._expand_conv(inputs)
-            x = self._bn0(x)
-            x = self._swish(x)
 
-        x1 = self._depthwise_conv1(x)
-        x1 = self._bn1(x1)
-        x1 = self._swish(x1)
-        
-        x2 = self._depthwise_conv2(x)
-        x2 = self._bn3(x2)
-        x2 = self._swish(x2)
-        
-        x3 = self._depthwise_conv3(x)
-        x3 = self._bn4(x3)
-        x3 = self._swish(x3)
         # Squeeze and Excitation
         if self.has_se:
-            d = F.adaptive_avg_pool2d(x1, 1) + F.adaptive_avg_pool2d(x2, 1) + F.adaptive_avg_pool2d(x3, 1)
-            d = self._se_reduce(d)
-            d = self._bn5(d)
-            d = self._swish(d)
-            d = self._se_expand(d)
-            d = torch.unsqueeze(d, 1).view(-1, 3, self.oup, 1, 1)
-            d = torch.softmax(d,1)
-            x1 = x1 * d[:, 0, :, :, :].squeeze(1)
-            x2 = x2 * d[:, 1, :, :, :].squeeze(1)
-            x3 = x3 * d[:, 2, :, :, :].squeeze(1)
-            x = x1 + x2 + x3        
-            # x_se1 = self._se_reduce(x_se1)
-            # x_se1 = self._swish(x_se1)
-            # x_se1 = self._se_expand(x_se1)
-            # x_se2 = self._se_reduce(x_se2)
-            # x_se2 = self._swish(x_se2)
-            # x_se2 = self._se_expand(x_se2)
-            # x_se3 = self._se_reduce(x_se3)
-            # x_se3 = self._swish(x_se3)
-            # x_se3 = self._se_expand(x_se3)
-            # we_sum = torch.sigmoid(x_se1)+torch.sigmoid(x_se2)+torch.sigmoid(x_se3)
-            # we_1= torch.sigmoid(x_se1)/(torch.sigmoid(x_se1)+torch.sigmoid(x_se2))        
-            # x =  we_1 * x1 + (1.0-we_1) * x2
+            
+            if(self.atten==0):
+                if self._block_args.expand_ratio != 1:
+                    # Pointwise convolution
+                    x = self._expand_conv(inputs)
+                    x = self._bn0(x)
+                    x = self._swish(x)
+                x = self._depthwise_conv1(x)
+                x = self._bn1(x)
+                x = self._swish(x)
+                x_se = F.adaptive_avg_pool2d(x, 1)
+                x_se = self._se_reduce(x_se)
+                x_se = self._swish(x_se)
+                x_se = self._se_expand(x_se)
+                x =torch.sigmoid(x_se) * x
+                # Pointwise Convolution
+                x = self._project_conv(x)
+                x = self._bn2(x)   
+                                 
+            elif(self.atten==1):
+                
+                if self._block_args.expand_ratio != 1:
+                    # Pointwise convolution
+                    x = self._expand_conv(inputs)
+                    x = self._bn0(x)
+                    x = self._swish(x)
+                x1 = self._depthwise_conv1(x)
+                x1 = self._bn1(x1)
+                x1 = self._swish(x1)
+            
+                x2 = self._depthwise_conv2(x)
+                x2 = self._bn3(x2)
+                x2 = self._swish(x2)
+            
+                x3 = self._depthwise_conv3(x)
+                x3 = self._bn4(x3)
+                x3 = self._swish(x3)
+                
+                d = F.adaptive_avg_pool2d(x1, 1) + F.adaptive_avg_pool2d(x2, 1) + F.adaptive_avg_pool2d(x3, 1)
+                d = self._se_reduce(d)
+                d = self._bn5(d)
+                d = self._swish(d)
+                d = self._se_expand(d)
+                d = torch.unsqueeze(d, 1).view(-1, 3, self.oup, 1, 1)
+                d = torch.softmax(d,1)
+                x1 = x1 * d[:, 0, :, :, :].squeeze(1)
+                x2 = x2 * d[:, 1, :, :, :].squeeze(1)
+                x3 = x3 * d[:, 2, :, :, :].squeeze(1)
+                x = x1 + x2 + x3        
 
-        # Pointwise Convolution
-        x = self._project_conv(x)
-        x = self._bn2(x)
+                # Pointwise Convolution
+                x = self._project_conv(x)
+                x = self._bn2(x)
+            
+            elif(self.atten==2 or self.atten==3):
+                if self._block_args.expand_ratio != 1:
+                    x = self._expand_conv(inputs)
+                    x = self._bn0(x)
+                    x = self._swish(x)
+                x = self._depthwise_conv1(x)
+                x = self._bn1(x)
+                x = self._swish(x)
+                x = self.sge_cbam(x)
+                x = self._project_conv(x)
+                x = self._bn2(x)              
+            
+            
 
         # Skip connection and drop connect
         input_filters, output_filters = self._block_args.input_filters, self._block_args.output_filters
@@ -257,12 +398,12 @@ class EfficientNet(nn.Module):
             )
 
             # The first block needs to take care of stride and filter size increase.
-            self._blocks.append(MBConvBlock(block_args, self._global_params, image_size=image_size))
+            self._blocks.append(MBConvBlock(block_args, self._global_params, image_size=image_size,atten=block_args.atten))
             image_size = calculate_output_image_size(image_size, block_args.stride)
             if block_args.num_repeat > 1:  # modify block_args to keep same output size
                 block_args = block_args._replace(input_filters=block_args.output_filters, stride=1)
             for _ in range(block_args.num_repeat - 1):
-                self._blocks.append(MBConvBlock(block_args, self._global_params, image_size=image_size))
+                self._blocks.append(MBConvBlock(block_args, self._global_params, image_size=image_size, atten=block_args.atten))
                 # image_size = calculate_output_image_size(image_size, block_args.stride)  # stride = 1
 
         # Head

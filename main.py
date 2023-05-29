@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('--channel', type=int, default=4, help='Number of channel')
     parser.add_argument('--ifft', type=str, default='False', help='Whether do ifft transform')
     parser.add_argument('--num_classes', type=int, default=10, help='Number of classes')
-    parser.add_argument('--num_epoch', type=int, default=100, help='Number of epochs')
+    parser.add_argument('--num_epoch', type=int, default=1000, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
     parser.add_argument('--num_workers', type=int, default=23, help='Num_workers for dataloader')
     parser.add_argument('--model', type=str, default='vgg', help='model of backbone: vgg or Alexnet')

@@ -44,7 +44,7 @@ GlobalParams = collections.namedtuple('GlobalParams', [
 # Parameters for an individual model block
 BlockArgs = collections.namedtuple('BlockArgs', [
     'num_repeat', 'kernel_size', 'stride', 'expand_ratio',
-    'input_filters', 'output_filters', 'se_ratio', 'id_skip'])
+    'input_filters', 'output_filters', 'se_ratio', 'id_skip','atten'])
 
 # Set GlobalParams and BlockArgs's defaults
 GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)
@@ -388,6 +388,20 @@ class BlockDecoder(object):
         assert (('s' in options and len(options['s']) == 1) or
                 (len(options['s']) == 2 and options['s'][0] == options['s'][1]))
 
+        atten_option=0
+        if('att' in block_string):
+            assert ('att' in options and len(options['att'])==1)
+            atten=int(options['att'])
+            
+        # if(atten_option==0):
+        #     atten='se'
+        # elif(atten_option==1):
+        #     atten='sk'
+        # elif(atten_option==2):
+        #     atten='sge'
+        # else:
+        #     atten='se'
+        
         return BlockArgs(
             num_repeat=int(options['r']),
             kernel_size=int(options['k']),
@@ -396,7 +410,11 @@ class BlockDecoder(object):
             input_filters=int(options['i']),
             output_filters=int(options['o']),
             se_ratio=float(options['se']) if 'se' in options else None,
-            id_skip=('noskip' not in block_string))
+            id_skip=('noskip' not in block_string),
+            atten=atten)
+            
+        
+            
 
     @staticmethod
     def _encode_block_string(block):
@@ -499,14 +517,19 @@ def efficientnet(width_coefficient=None, depth_coefficient=None, image_size=None
 
     # Blocks args for the whole model(efficientnet-b0 by default)
     # It will be modified in the construction of EfficientNet Class according to model
+    # Attension module configurations
+    # att0->se (default)
+    # att1->sk
+    # att2->sge
+    # att3->cbam
     blocks_args = [
-        'r1_k3_s11_e1_i32_o16_se0.25',
-        'r2_k3_s22_e6_i16_o24_se0.25',
-        'r2_k5_s22_e6_i24_o40_se0.25',
-        'r3_k3_s22_e6_i40_o80_se0.25',
-        'r3_k5_s11_e6_i80_o112_se0.25',
-        'r4_k5_s22_e6_i112_o192_se0.25',
-        'r1_k3_s11_e6_i192_o320_se0.25',
+        'r1_k3_s11_e1_i32_o16_se0.25_att3',
+        'r2_k3_s22_e6_i16_o24_se0.25_att3',
+        'r2_k5_s22_e6_i24_o40_se0.25_att3',
+        'r3_k3_s22_e6_i40_o80_se0.25_att3',
+        'r3_k5_s11_e6_i80_o112_se0.25_att3',
+        'r4_k5_s22_e6_i112_o192_se0.25_att3',
+        'r1_k3_s11_e6_i192_o320_se0.25_att3',
     ]
     blocks_args = BlockDecoder.decode(blocks_args)
 
