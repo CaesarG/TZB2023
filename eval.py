@@ -4,13 +4,26 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 from IPython.core.debugger import set_trace
-
+import torchvision
+from PIL import Image
+import matplotlib.pyplot as plt
+import cv2
+from matplotlib import _api, cbook, cm
+# Import CAMs
+from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 class EvalModule(object):
     def __init__(self, dataset, model):
         self.dataset = dataset
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
+        # print(model)
+        target_layers=[self.model._bn1] # effnet cust
+        # target_layers=[self.model.bn2] # effnet no cust
+        # target_layers=[self.model.conv[-1]] #effnetV2
+        self.cam = EigenCAM(model=self.model,target_layers=target_layers,use_cuda=torch.cuda.is_available())
 
     def load_model(self, model, resume):
         checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
@@ -72,4 +85,33 @@ class EvalModule(object):
         for i in range(len(confusion_cnt)):
             Confusion_Matrix[i] = Confusion_Matrix[i] / confusion_cnt[i]
         print(Confusion_Matrix)
+        
+
+        for cnt, data in enumerate(dsets_loader):
+            if (cnt % 100)==0:
+                targets = [ClassifierOutputTarget(281)]
+                grayscale_cam = self.cam(input_tensor=data[0], targets=targets)
+                grayscale_cam = grayscale_cam[0, :].T
+                data_rcs = data[0].cpu().clone().squeeze(0)
+                data_Ev = data_rcs[0,:,:].T
+                data_Eh = data_rcs[1,:,:].T
+                img_Ev = torchvision.transforms.ToPILImage()(data_Ev)
+                img_Eh = torchvision.transforms.ToPILImage()(data_Eh)
+                img_Ev = img_Ev/np.max(img_Ev)
+                img_Eh = img_Eh/np.max(img_Eh)
+                # img_Eh = img_Eh.convert("RGB")
+                sm=cm.ScalarMappable(cmap='viridis')
+                rgb_img_Ev = sm.to_rgba(img_Ev, bytes=True)
+                rgb_img_Eh = sm.to_rgba(img_Eh, bytes=True)
+                rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
+                rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
+                rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
+                rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
+                visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.7) 
+                visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.7)
+                plt.subplot(121) 
+                plt.imshow(visualization_Ev)
+                plt.subplot(122)
+                plt.imshow(visualization_Eh)
+                plt.show()      
         return 0
