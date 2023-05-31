@@ -12,7 +12,7 @@ from model.DPA_Alexnet import DPAAlexNet
 from model.DPA_Alexnet_4channel import DPAAlexNet_4channel
 from model.vgg import vgg
 from Autoformer.supernet_transformer import Vision_TransformerSuper
-from lib.config import cfg, update_config_from_file
+
 # 调试函数
 from IPython.core.debugger import set_trace
 import random
@@ -24,7 +24,7 @@ from model.effnetv2 import effnetv2_s
 from model.efficientnet_pytorch import EfficientNet
 # from timm.models.resnet import *
 
- 
+
 def sample_configs(choices):
 
     config = {}
@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument('--num_classes', type=int, default=10, help='Number of classes')
     parser.add_argument('--num_epoch', type=int, default=1000, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
-    parser.add_argument('--num_workers', type=int, default=23, help='Num_workers for dataloader')
+    parser.add_argument('--num_workers', type=int, default=20, help='Num_workers for dataloader')
     parser.add_argument('--model', type=str, default='vgg', help='model of backbone: vgg or Alexnet')
     parser.add_argument('--init_lr', type=float, default=3e-5, help='Initial learning rate')
     parser.add_argument('--ngpus', type=int, default=1, help='Number of gpus, ngpus>1 for multigpu')
@@ -57,19 +57,19 @@ def parse_args():
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
                                                                          'for test or eval')
     parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval}')
-    parser.add_argument('--CA', action="store_true", default='False', help='Whether to use CA Attention')
+    parser.add_argument('--CA', action="store_true", default=False, help='Whether to use CA Attention')
     # parser.add_argument('--cfg',default="./experiments/supernet/supernet-T.yaml",help='experiment configure file name',required=True,type=str)
     parser.add_argument('--drop', type=float, default=0.0, metavar='PCT',
                         help='Dropout rate (default: 0.)')
     parser.add_argument('--drop-path', type=float, default=0.1, metavar='PCT',
-                        help='Drop path rate (default: 0.1)') 
+                        help='Drop path rate (default: 0.1)')
     parser.add_argument('--max_relative_position', type=int, default=14, help='max distance in relative position embedding')
     parser.add_argument('--relative_position', action='store_true')
-    parser.add_argument('--no_abs_pos', default='True', action='store_true')
+    parser.add_argument('--no_abs_pos', default=True, action='store_true')
     parser.add_argument('--gp', action='store_true')
-    parser.add_argument('--change_qkv',default='True',action='store_true')
+    parser.add_argument('--change_qkv',default=True,action='store_true')
     parser.add_argument('--opt',type=str,default='adam')
-    parser.add_argument('--cust',action='store_true')
+    parser.add_argument('--cust',action='store_true',default=False)
     # parser.add_argument('--conf_thresh', type=float, default=0.3, help='Confidence thresh hold')
     args = parser.parse_args()
     return args
@@ -141,7 +141,7 @@ if __name__ == '__main__':
             model.pos_embed = nn.Parameter(torch.zeros(1, model.patch_embed.num_patches + 1, model.embed_dim))
         elif args.model == 'effnetv2':
             model = effnetv2_s(num_classes=10)
-        model.cuda()    
+        model.cuda()
         # 是否ifft
         if args.ifft == 'False':
             dataset = myDataset

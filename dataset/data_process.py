@@ -5,7 +5,8 @@ from timm.data import create_transform
 import matplotlib.pyplot as plt
 
 def pre_process(x):
-    x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T))).astype(np.float32))
+    x=np.log10(np.abs(np.fft.ifftshift(np.fft.ifft(x.T))).astype(np.float32))
+    # x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T))).astype(np.float32))
     # x -= np.mean(x)
     # x /= np.std(x)
     # x=x[:,100:300]
