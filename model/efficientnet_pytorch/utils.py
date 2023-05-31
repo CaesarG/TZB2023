@@ -393,14 +393,6 @@ class BlockDecoder(object):
             assert ('att' in options and len(options['att'])==1)
             atten=int(options['att'])
             
-        # if(atten_option==0):
-        #     atten='se'
-        # elif(atten_option==1):
-        #     atten='sk'
-        # elif(atten_option==2):
-        #     atten='sge'
-        # else:
-        #     atten='se'
         
         return BlockArgs(
             num_repeat=int(options['r']),
@@ -483,7 +475,7 @@ def efficientnet_params(model_name):
     """
     params_dict = {
         # Coefficients:   width,depth,res,dropout
-        'efficientnet-b0': (1.0, 1.0, (401,512), 0.2),
+        'efficientnet-b0': (1.0, 1.0, (512,401), 0.0),
         'efficientnet-b1': (1.0, 1.1, 240, 0.2),
         'efficientnet-b2': (1.1, 1.2, 260, 0.3),
         'efficientnet-b3': (1.2, 1.4, 300, 0.3),
@@ -522,14 +514,16 @@ def efficientnet(width_coefficient=None, depth_coefficient=None, image_size=None
     # att1->sk
     # att2->sge
     # att3->cbam
+    # att4->eca
+    # att5->ceca
     blocks_args = [
-        'r1_k3_s11_e1_i32_o16_se0.25_att1',
-        'r2_k3_s22_e6_i16_o24_se0.25_att1',
-        'r2_k5_s22_e6_i24_o40_se0.25_att1',
-        'r3_k3_s22_e6_i40_o80_se0.25_att1',
-        'r3_k5_s11_e6_i80_o112_se0.25_att1',
-        'r4_k5_s22_e6_i112_o192_se0.25_att1',
-        'r1_k3_s11_e6_i192_o320_se0.25_att1',
+        'r1_k3_s11_e1_i32_o16_se0.25_att5',
+        'r2_k3_s22_e6_i16_o24_se0.25_att4',
+        'r2_k5_s22_e6_i24_o40_se0.25_att4',
+        'r3_k3_s22_e6_i40_o80_se0.25_att5',
+        'r3_k5_s11_e6_i80_o112_se0.25_att0',
+        'r4_k5_s22_e6_i112_o192_se0.25_att4',
+        'r1_k3_s11_e6_i192_o320_se0.25_att3',
     ]
     blocks_args = BlockDecoder.decode(blocks_args)
 
@@ -564,7 +558,6 @@ def get_model_params(model_name, override_params):
     if model_name.startswith('efficientnet'):
         w, d, s, p = efficientnet_params(model_name)
         # note: all models have drop connect rate = 0.2
-        p=0.0
         blocks_args, global_params = efficientnet(
             width_coefficient=w, depth_coefficient=d, dropout_rate=p, image_size=s)
     else:

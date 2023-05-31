@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 def pre_process(x):
     x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T))).astype(np.float32))
-    # x -= np.mean(x)
+    x -= np.mean(x)
     # x /= np.std(x)
     # x=x[:,100:300]
     # plt.imshow(x.astype('uint8'))

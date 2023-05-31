@@ -57,7 +57,7 @@ def parse_args():
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
                                                                          'for test or eval')
     parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval}')
-    parser.add_argument('--CA', action="store_true", default='False', help='Whether to use CA Attention')
+    parser.add_argument('--CA', action="store_true", default=False, help='Whether to use CA Attention')
     # parser.add_argument('--cfg',default="./experiments/supernet/supernet-T.yaml",help='experiment configure file name',required=True,type=str)
     parser.add_argument('--drop', type=float, default=0.0, metavar='PCT',
                         help='Dropout rate (default: 0.)')
@@ -65,9 +65,9 @@ def parse_args():
                         help='Drop path rate (default: 0.1)') 
     parser.add_argument('--max_relative_position', type=int, default=14, help='max distance in relative position embedding')
     parser.add_argument('--relative_position', action='store_true')
-    parser.add_argument('--no_abs_pos', default='True', action='store_true')
+    parser.add_argument('--no_abs_pos', default=True, action='store_true')
     parser.add_argument('--gp', action='store_true')
-    parser.add_argument('--change_qkv',default='True',action='store_true')
+    parser.add_argument('--change_qkv',default=True,action='store_true')
     parser.add_argument('--opt',type=str,default='adam')
     parser.add_argument('--cust',action='store_true')
     # parser.add_argument('--conf_thresh', type=float, default=0.3, help='Confidence thresh hold')

@@ -65,6 +65,8 @@ gamma=d(1-softmin(d))
 reject as unknow if min(gamma)>theta
 
 class i = argmin(gamma) if min(gamma)<theta
+
+
 ### 1-10
 存放1~10个类别的rcs数据，每个文件夹存放250帧的mat文件，每帧包含Ev,Eh两种极化接收方式，两种接收数据大小均为401x512，401对应8G到10GHz的采样点数，
 512对应不同方位角俯仰角的接收位置。
