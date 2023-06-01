@@ -88,30 +88,33 @@ class EvalModule(object):
         
 
         for cnt, data in enumerate(dsets_loader):
-            if (cnt % 100)==0:
-                targets = [ClassifierOutputTarget(281)]
-                grayscale_cam = self.cam(input_tensor=data[0], targets=targets)
-                grayscale_cam = grayscale_cam[0, :].T
-                data_rcs = data[0].cpu().clone().squeeze(0)
-                data_Ev = data_rcs[0,:,:].T
-                data_Eh = data_rcs[1,:,:].T
-                img_Ev = torchvision.transforms.ToPILImage()(data_Ev)
-                img_Eh = torchvision.transforms.ToPILImage()(data_Eh)
-                img_Ev = img_Ev/np.max(img_Ev)
-                img_Eh = img_Eh/np.max(img_Eh)
-                # img_Eh = img_Eh.convert("RGB")
-                sm=cm.ScalarMappable(cmap='viridis')
-                rgb_img_Ev = sm.to_rgba(img_Ev, bytes=True)
-                rgb_img_Eh = sm.to_rgba(img_Eh, bytes=True)
-                rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
-                rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
-                rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
-                rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
-                visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.7) 
-                visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.7)
-                plt.subplot(121) 
-                plt.imshow(visualization_Ev)
-                plt.subplot(122)
-                plt.imshow(visualization_Eh)
-                plt.show()      
+            # if (cnt % 100)==0:
+            targets = [ClassifierOutputTarget(281)]
+            grayscale_cam = self.cam(input_tensor=data[0], targets=targets)
+            grayscale_cam = grayscale_cam[0, :].T
+            data_rcs = data[0].cpu().clone().squeeze(0)
+            data_Ev = data_rcs[0,:,:].T
+            data_Eh = data_rcs[1,:,:].T
+            img_Ev = torchvision.transforms.ToPILImage()(data_Ev)
+            img_Eh = torchvision.transforms.ToPILImage()(data_Eh)
+            img_Ev = img_Ev/(np.max(img_Ev)+1e-6)
+            img_Eh = img_Eh/(np.max(img_Eh)+1e-6)
+            # img_Eh = img_Eh.convert("RGB")
+            sm=cm.ScalarMappable(cmap='viridis')
+            rgb_img_Ev = sm.to_rgba(img_Ev, bytes=False)
+            rgb_img_Eh = sm.to_rgba(img_Eh, bytes=False)
+            rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
+            rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
+            rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
+            rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
+            visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.2) 
+            visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.2)
+            gt=data[1].item()
+            plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Ev.png', visualization_Ev)
+            plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Eh.png', visualization_Eh)
+            # plt.subplot(121) 
+            # plt.imshow(visualization_Ev)
+            # plt.subplot(122)
+            # plt.imshow(visualization_Eh)
+            # plt.show()      
         return 0
