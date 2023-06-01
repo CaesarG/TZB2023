@@ -40,10 +40,14 @@ class CustomDataset(Dataset):
         mat_data=sciio.loadmat(mat_name)
         # self.data_Ev=np.abs(mat_data['frame_Ev'])
         # self.data_Eh=np.abs(mat_data['frame_Eh'])    
-        self.data_Ev_fft_abs=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Ev'],dtype='complex').T))))
-        self.data_Eh_fft_abs=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(np.array(mat_data['frame_Eh'],dtype='complex').T))))
+        self.data_Ev_fft_abs=np.fft.ifft(np.array(mat_data['frame_Ev'],dtype='complex').T)
+        self.data_Eh_fft_abs=np.fft.ifft(np.array(mat_data['frame_Eh'],dtype='complex').T)
+        # self.data_Ev_fft_abs=self.data_Ev_fft_abs-np.mean(self.data_Ev_fft_abs)
+        # self.data_Eh_fft_abs=self.data_Eh_fft_abs-np.mean(self.data_Eh_fft_abs)
+        self.data_Eh_fft_abs=np.fft.fftshift(np.log10(1+np.abs(np.fft.fft(self.data_Eh_fft_abs.T))).T)
+        self.data_Ev_fft_abs=np.fft.fftshift(np.log10(1+np.abs(np.fft.fft(self.data_Ev_fft_abs.T))).T)
         self.data_Ev_fft_abs=self.data_Ev_fft_abs-np.mean(self.data_Ev_fft_abs)
-        self.data_Eh_fft_abs=self.data_Eh_fft_abs-np.mean(self.data_Eh_fft_abs)
+        self.data_Eh_fft_abs=self.data_Eh_fft_abs-np.mean(self.data_Eh_fft_abs)        
         
     
     def get_idx(self):
@@ -68,8 +72,8 @@ if __name__ =='__main__':
         image_Ev,image_Eh,label=radar_data[i] #0-2499
         class_idx,frame_idx=radar_data.get_idx()
 
-        plt.imsave('data2/'+str(class_idx)+'_'+str(frame_idx)+'_Ev.png', image_Ev)
-        plt.imsave('data2/'+str(class_idx)+'_'+str(frame_idx)+'_Eh.png', image_Eh)
+        plt.imsave('data4/'+str(class_idx)+'_'+str(frame_idx)+'_Ev.png', image_Ev)
+        plt.imsave('data4/'+str(class_idx)+'_'+str(frame_idx)+'_Eh.png', image_Eh)
         # plt.title(label)
         # plt.imshow(image_Ev)
         # plt.show()
