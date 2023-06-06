@@ -17,18 +17,10 @@ def accuracy(x, gt):
 	acc = np.sum(predicted == gt)/total
 	return acc
 
-<<<<<<< HEAD
 def acc_predicted(predicted, gt):
     total = len(gt)
     acc = np.sum(predicted == gt) / total
     return acc
-=======
-def acc_predicted(predicted,gt):
-    total=len(gt)
-    acc = np.sum(predicted == gt)/total
-    return acc
-    
->>>>>>> 2dc9eaaa4cea5ce3a66c08c67f8beed414a93691
 
 def auroc(inData, outData, in_low = True):
 	inDataMin = np.min(inData, 1)
@@ -182,21 +174,11 @@ class Openmax(nn.Module):
     def set_threshold(self,threshold):
         self.threshold=threshold
         
-<<<<<<< HEAD
     def get_predicted(self,total_scores):
         predicted = np.argmin(total_scores, axis=1)
         # reject the smaple with distance larger than threshold
         predicted[np.min(total_scores, axis=1) > self.threshold] = 9
         return predicted
-=======
-    def get_predicted(self):
-        total_activation,total_scores,total_gt,total_predicts = self.get_output('open', data_idx = 1, calculate_scores = True)
-        predicted = np.argmin(total_scores, axis = 1)
-        # reject the smaple with distance larger than threshold
-        predicted[total_scores>self.threshold]=10
-        return predicted
-    
->>>>>>> 2dc9eaaa4cea5ce3a66c08c67f8beed414a93691
         
         
         
@@ -208,7 +190,6 @@ if __name__ == '__main__':
     classifier.set_anchors(anchors)
     classifier.eval()
     classifier.set_anchors(classifier.find_anchor_means(only_correct=True))
-<<<<<<< HEAD
     classifier.set_threshold(20)
     total_activation_know, total_scores_know, total_gt_know, total_predicts_know = classifier.get_output('close',
                                                                                                          data_idx=1,
@@ -225,12 +206,5 @@ if __name__ == '__main__':
     # print(th.shape)
     print('acc_know=', accuracy_know)
     print('acc_open=', accuracy_open)
-=======
-    total_activation_know,total_scores_know,total_gt_know,total_predicts_know = classifier.get_output('close', data_idx = 1, calculate_scores = True) 
-    total_activation,total_scores,total_gt,total_predicts = classifier.get_output('open',data_idx = 1, calculate_scores = True)
-    open_predicted=classifier.get_predicted()
-    accuracy_know = accuracy(total_scores_know, total_gt_know)
-    accuracy_open = acc_predicted(open_predicted,total_gt)
->>>>>>> 2dc9eaaa4cea5ce3a66c08c67f8beed414a93691
     auroc,th = auroc(total_scores_know, total_scores)
     print('AUROC =', auroc)
