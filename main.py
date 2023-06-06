@@ -24,6 +24,7 @@ from model.effnetv2 import effnetv2_s
 from model.efficientnet_pytorch import EfficientNet
 # from timm.models.resnet import *
 
+NUM_CLASSES=9
  
 def sample_configs(choices):
 
@@ -42,15 +43,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Alexnet Implementation')
     parser.add_argument('--channel', type=int, default=4, help='Number of channel')
     parser.add_argument('--ifft', type=str, default='False', help='Whether do ifft transform')
-    parser.add_argument('--num_classes', type=int, default=10, help='Number of classes')
+    parser.add_argument('--num_classes', type=int, default=NUM_CLASSES, help='Number of classes')
     parser.add_argument('--num_epoch', type=int, default=1000, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
-    parser.add_argument('--num_workers', type=int, default=23, help='Num_workers for dataloader')
+    parser.add_argument('--num_workers', type=int, default=24, help='Num_workers for dataloader')
     parser.add_argument('--model', type=str, default='vgg', help='model of backbone: vgg or Alexnet')
     parser.add_argument('--init_lr', type=float, default=3e-5, help='Initial learning rate')
     parser.add_argument('--ngpus', type=int, default=1, help='Number of gpus, ngpus>1 for multigpu')
     parser.add_argument('--resume_train', type=str, default='', help='Weights resumed in training/Absolute path')
     parser.add_argument('--resume', type=str, default='model_10.pth', help='Weights resumed testing and evaluation')
+    parser.add_argument('--weight_path', type=str, default='weight_of_model', help='Weights saved directory')
     parser.add_argument('--weight_save', type=str, default='weight_of_model', help='Weights saved directory')
     parser.add_argument('--data_dir', type=str, default='dataRCS/annotations', help='Path of data and annotation '
                                                                                     'directory')
@@ -124,23 +126,34 @@ if __name__ == '__main__':
             if args.cust:
                 model = EfficientNet.from_pretrained('efficientnet-b0',
                                                     in_channels=2,
-                                                    num_classes=10)
+                                                    num_classes=NUM_CLASSES)
             else:
-                model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=10)
+                model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=NUM_CLASSES)
                 model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
             # model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
         elif args.model == 'resnet':
-            model = timm.create_model('resnet50',pretrained=False,num_classes=10)
+            model = timm.create_model('resnet50',pretrained=False,num_classes=NUM_CLASSES)
             model.conv1=nn.Conv2d(2,64,kernel_size=(3,3),stride=(1,1),padding=(3,3),bias=False)
         elif args.model == 'vit':
-            model = timm.create_model('vit_small_patch16_224',pretrained=True,num_classes=10)
+            model = timm.create_model('vit_small_patch16_224',pretrained=True,num_classes=NUM_CLASSES)
             model.patch_embed.proj=nn.Conv2d(2,768,kernel_size=(16,16),stride=(16,16))
             model.patch_embed.img_size=(401,512)
             model.patch_embed.num_patches = (401// 16) * (512 // 16)
             model.patch_embed=PatchEmbed((401,512),16,2,model.embed_dim)
             model.pos_embed = nn.Parameter(torch.zeros(1, model.patch_embed.num_patches + 1, model.embed_dim))
         elif args.model == 'effnetv2':
-            model = effnetv2_s(num_classes=10)
+            model = effnetv2_s(num_classes=NUM_CLASSES)
+        elif args.model =='convnextv2':
+            model = timm.create_model("hf_hub:timm/convnextv2_base.fcmae_ft_in22k_in1k", pretrained=True,num_classes=NUM_CLASSES)
+            model.stem[0]=nn.Conv2d(2,128,(4,4),stride=(4,4))
+        # elif args.model == 'halonet':
+        #     model = timm.create_model("hf_hub:timm/eca_halonext26ts.c1_in1k", pretrained=True,num_classes=10)
+        #     model.stem.conv1.conv=nn.Conv2d(2,24,kernel_size=(3,3),stride=(2,2),padding=(1,1),bias=False)
+        # elif args.model == 'botnet':
+            # model = timm.create_model("hf_hub:timm/botnet26t_256.c1_in1k", pretrained=True)
+            # model.stem.conv1.conv=nn.Conv2d(2,24,kernel_size=(3,3),stride=(2,2),padding=(1,1),bias=False)
+            # model.stages.2.1.self_atten.pos_embed=
+          
         model.cuda()    
         # 是否ifft
         if args.ifft == 'False':

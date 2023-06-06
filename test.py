@@ -20,7 +20,7 @@ class TestModule(object):
         return model
 
     def test_network(self, args):
-        weight_path = '/home/kaliy/Desktop/TZB2023-main/weight_of_model'
+        weight_path = './weight_of_model'
         self.model = self.load_model(self.model, os.path.join(weight_path, args.resume))    # 载入训练模型权值
         self.model = self.model.to(self.device)    # 将模型载入GPU
         self.model.eval()

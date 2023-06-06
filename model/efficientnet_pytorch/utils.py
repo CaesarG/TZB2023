@@ -517,12 +517,12 @@ def efficientnet(width_coefficient=None, depth_coefficient=None, image_size=None
     # att4->eca
     # att5->ceca
     blocks_args = [
-        'r1_k3_s11_e1_i32_o16_se0.25_att5',
-        'r2_k3_s22_e6_i16_o24_se0.25_att4',
-        'r2_k5_s22_e6_i24_o40_se0.25_att4',
-        'r3_k3_s22_e6_i40_o80_se0.25_att5',
+        'r1_k3_s11_e1_i32_o16_se0.25_att2',
+        'r2_k3_s22_e6_i16_o24_se0.25_att1',
+        'r2_k5_s22_e6_i24_o40_se0.25_att1',
+        'r3_k3_s22_e6_i40_o80_se0.25_att0',
         'r3_k5_s11_e6_i80_o112_se0.25_att0',
-        'r4_k5_s22_e6_i112_o192_se0.25_att4',
+        'r4_k5_s22_e6_i112_o192_se0.25_att3',
         'r1_k3_s11_e6_i192_o320_se0.25_att3',
     ]
     blocks_args = BlockDecoder.decode(blocks_args)

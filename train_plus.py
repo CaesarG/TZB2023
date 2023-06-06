@@ -9,11 +9,13 @@ from sam import SAM
 from utility.bypass_bn import enable_running_stats,disable_running_stats
 from utility.smooth_cross_entropy import smooth_crossentropy
 
+NUM_CLASSES=9
+
 class TrainModule(object):
     def __init__(self, dataset, model):
         torch.manual_seed(317)
         self.dataset = dataset
-        self.num_classes = 10
+        self.num_classes = NUM_CLASSES
         self.lamda = 0.5 #第一个调的地方0.1,0.5,1
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
@@ -103,7 +105,7 @@ class TrainModule(object):
             self.optimizer = SAM(self.model.parameters(), base_optimizer, lr=args.init_lr, momentum=0.9)
         else:
             self.is_two_step=False
-            self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
+            self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr, weight_decay=1e-5)
         save_path = args.weight_save
         start_epoch = 1
 

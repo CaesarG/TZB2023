@@ -24,7 +24,7 @@ class myDataset_ifft(Dataset):
 
     def get_rcs_ifft(self, annotation_line):
         line = annotation_line.split()
-        path_rcs = line[0]
+        path_rcs = './'+line[0]
         ground_truth = int(line[1])    # 类别标签值
         data_rcs = sciio.loadmat(path_rcs)    # sciio加载的每帧mat数据为一个字典
         data_Ev = data_rcs['frame_Ev'].astype(complex)

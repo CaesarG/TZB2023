@@ -4,11 +4,22 @@ from torchvision import transforms
 from timm.data import create_transform
 import matplotlib.pyplot as plt
 
-def pre_process(x):
-    x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T))).astype(np.float32))
-    x -= np.mean(x)
+def pre_process(x,type=['imaging']):
+    if 'abs_ifft' in type:
+        x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T)))).astype(np.float32)
+    elif 'imaging' in type:
+        x=np.fft.ifft(x.T)
+        x=np.fft.fftshift(np.log10(1+np.abs(np.fft.fft(x.T))).T).astype(np.float32)      
+    elif 'only_log' in type:
+        x=np.log10(1+np.abs(x.T)).astype(np.float32)
+    if 'mean' in type:
+        x -= np.mean(x)
+        
+    if 'half_pic' in type:
+        x=x[:,100:300]
+    # x=np.log10(1+np.abs(np.fft.fftshift(np.fft.fft(x)))).astype(np.float32)
     # x /= np.std(x)
-    # x=x[:,100:300]
+
     # plt.imshow(x.astype('uint8'))
     # plt.show()
     # trans_list = [

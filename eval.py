@@ -20,10 +20,11 @@ class EvalModule(object):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
         # print(model)
-        target_layers=[self.model._bn1] # effnet cust
-        # target_layers=[self.model.bn2] # effnet no cust
+        # target_layers=[self.model._bn1] # effnet cust
+        target_layers=[self.model.bn2] # effnet no cust
         # target_layers=[self.model.conv[-1]] #effnetV2
-        self.cam = EigenCAM(model=self.model,target_layers=target_layers,use_cuda=torch.cuda.is_available())
+        # self.cam = EigenCAM(model=self.model,target_layers=target_layers,use_cuda=torch.cuda.is_available())
+        self.cam = GradCAMPlusPlus(model=self.model,target_layers=target_layers,use_cuda=torch.cuda.is_available())
 
     def load_model(self, model, resume):
         checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
@@ -33,7 +34,7 @@ class EvalModule(object):
         return model
 
     def eval_network(self, args):
-        weight_path = r'weight_of_model'
+        weight_path = args.weight_path
         self.model = self.load_model(self.model, os.path.join(weight_path, args.resume))    # 载入训练模型权值
         self.model = self.model.to(self.device)    # 将模型载入GPU
         self.model.eval()
@@ -89,8 +90,8 @@ class EvalModule(object):
 
         for cnt, data in enumerate(dsets_loader):
             # if (cnt % 100)==0:
-            targets = [ClassifierOutputTarget(281)]
-            grayscale_cam = self.cam(input_tensor=data[0], targets=targets)
+            targets = None
+            grayscale_cam = self.cam(input_tensor=data[0], targets=targets, eigen_smooth=True)
             grayscale_cam = grayscale_cam[0, :].T
             data_rcs = data[0].cpu().clone().squeeze(0)
             data_Ev = data_rcs[0,:,:].T
@@ -101,14 +102,14 @@ class EvalModule(object):
             img_Eh = img_Eh/(np.max(img_Eh)+1e-6)
             # img_Eh = img_Eh.convert("RGB")
             sm=cm.ScalarMappable(cmap='viridis')
-            rgb_img_Ev = sm.to_rgba(img_Ev, bytes=False)
-            rgb_img_Eh = sm.to_rgba(img_Eh, bytes=False)
+            rgb_img_Ev = sm.to_rgba(img_Ev, bytes=True)
+            rgb_img_Eh = sm.to_rgba(img_Eh, bytes=True)
             rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
             rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
             rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
             rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
-            visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.2) 
-            visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.2)
+            visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.5) 
+            visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.5)
             gt=data[1].item()
             plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Ev.png', visualization_Ev)
             plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Eh.png', visualization_Eh)
