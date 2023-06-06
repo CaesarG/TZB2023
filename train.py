@@ -13,10 +13,10 @@ ALPHA = 10  # 第二个调的地方5,10
 
 ## --------------------------------------------------------------
 class TrainModule(object):
-    def __init__(self, dataset, model):
+    def __init__(self, dataset, model, args):
         torch.manual_seed(317)
         self.dataset = dataset
-        self.num_classes = 10
+        self.num_classes = args.num_classes
         self.lamda = LMD
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
@@ -155,15 +155,17 @@ class TrainModule(object):
         # TODO dataset部分到此结束
 
         print('Starting training...')
-        best_acc = 0
+        train_acc = np.array([])
+        val_acc = np.array([])
+        best_loss = 100
         for epoch in range(start_epoch, args.num_epoch + 1):
             print('-' * 10)
             print('Epoch: {}/{} '.format(epoch, args.num_epoch))
             # 训练集训练
-            epoch_train_acc = self.run_epoch(phase='train',
-                                             data_loader=dsets_loader['train'],
-                                             criterion=criterion)  # 进行一次epoch训练
-            self.scheduler.step()  # 更新学习率 self.scheduler.step(epoch)
+            _, epoch_train_acc = self.run_epoch(phase='train',
+                                                data_loader=dsets_loader['train'],
+                                                criterion=criterion)  # 进行一次epoch训练
+            train_acc = np.append(train_acc, epoch_train_acc)  # 记录每次epoch损失值
 
             # if epoch % 5 == 0 or epoch > 20:    # 存储权值文件
             # if epoch % 3 == 0:
@@ -177,16 +179,32 @@ class TrainModule(object):
             #                 self.model,
             #                 self.optimizer)
             # 验证集验证
-            epoch_val_acc = self.run_epoch(phase='val',
-                                           data_loader=dsets_loader['val'],
-                                           criterion=criterion)  # 进行一次epoch训练
+            test_loss, epoch_val_acc = self.run_epoch(phase='val',
+                                                      data_loader=dsets_loader['val'],
+                                                      criterion=criterion)  # 进行一次epoch训练
+            val_acc = np.append(val_acc, epoch_val_acc)  # 记录每次epoch损失值
 
-            if best_acc < epoch_val_acc:
-                best_acc = epoch_val_acc
-                self.save_model(os.path.join(save_path, 'model_best_{}.pth'.format(epoch)),
+            self.scheduler.step()  # 更新学习率 self.scheduler.step(epoch)
+            # if best_loss < epoch_val_acc:
+            #     best_loss = epoch_val_acc
+            self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
+                            epoch,
+                            self.model,
+                            self.optimizer)
+            self.save_model(os.path.join(save_path, 'model_last.pth'.format(epoch)),
+                            epoch,
+                            self.model,
+                            self.optimizer)
+            if best_loss > epoch_val_acc:
+                best_loss = epoch_val_acc
+                self.save_model(os.path.join(save_path, 'model_best.pth'),
                                 epoch,
                                 self.model,
                                 self.optimizer)
+            train_val_acc = np.concatenate([np.expand_dims(train_acc, axis=1), np.expand_dims(val_acc, axis=1)],
+                                           axis=1)
+            np.savetxt(os.path.join(save_path, 'train_acc.txt'), train_val_acc, fmt='%.6f',
+                       header='train_acc / val_acc')
 
     def cross_validation(self, args, i):
         alpha = ALPHA
@@ -293,6 +311,7 @@ class TrainModule(object):
             if epoch_val_acc > 95:
                 print('=============================================================================')
                 break
+
     # TODO 根绝dataset和dataloader的取样方式，编写合适的训练代码，暂且按照：标签+一维距离像图的格式
     def run_epoch(self, phase, data_loader, criterion):
         if phase == 'train':
@@ -332,6 +351,7 @@ class TrainModule(object):
             print('Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (train_loss / (batch_idx + 1), 100. * correctDist / total, correctDist, total))
             epoch_acc = 100. * correctDist / total
+            test_loss = Test_Loss / (batch_idx + 1)
         else:
             with torch.no_grad():
                 for batch_idx, (data, gt) in enumerate(data_loader):
@@ -354,6 +374,7 @@ class TrainModule(object):
             print('Test_Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (Test_Loss / (batch_idx + 1), 100. * acc / total, acc, total))
             epoch_acc = 100. * acc / total
+            test_loss = Test_Loss / (batch_idx + 1)
         # TODO 修改至此结束
 
-        return epoch_acc
+        return test_loss, epoch_acc

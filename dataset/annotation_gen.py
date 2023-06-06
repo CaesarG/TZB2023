@@ -6,59 +6,78 @@ import numpy as np
 # path = 'dataRCS_2'
 # saveBasePath_linux = '../dataRCS_2/annotations'
 # path_linux = 'dataRCS_2'
-saveBasePath_linux = '../dataRCS/annotations'
+saveBasePath_linux = '../openset_annotations/annotations'
 path_linux1 = 'dataRCS'
 path_linux2 = 'dataRCS_2'
 random.seed(0)
-ftest = [None] * 9
-ftrain = [None] * 9
-fval = [None] * 9
-DATA = [np.array([], dtype='int')] * 10
+ftest = [None] * 10
+ftrain = [None] * 10
+fval = [None] * 10
+foval = [None] * 10
+fotest = [None] * 10
 strip = int(250 * 2 * 0.1)
+Data = [None] * 10
 for i in range(10):
-    shuffled_indices = (np.random.permutation(250 * 2) + i * 250 * 2)
+    Data[i] = np.random.permutation(500)
 
-    for j in range(10):
-        DATA[j] = np.append(DATA[j], shuffled_indices[j * strip:(j + 1) * strip])
-
-for i in range(9):
+for i in range(10):
     folder = os.path.exists(saveBasePath_linux + str(i))
     if not folder:
         os.makedirs(saveBasePath_linux + str(i))
     ftest[i] = open('{}{}/test.txt'.format(saveBasePath_linux, i), 'w')
     ftrain[i] = open('{}{}/train.txt'.format(saveBasePath_linux, i), 'w')
     fval[i] = open('{}{}/val.txt'.format(saveBasePath_linux, i), 'w')
+    foval[i] = open('{}{}/open_val.txt'.format(saveBasePath_linux, i), 'w')
+    fotest[i] = open('{}{}/open_test.txt'.format(saveBasePath_linux, i), 'w')
 
 
-def create_path(num):
+def create_path(num, x):
     i = num // 500
+    y = i
+    if i > x:
+        y -= 1
+    elif i == x:
+        y = 9
     j = num % 500
     if j // 250 == 1:
         path = path_linux2
     else:
         path = path_linux1
     j %= 250
-    path += '/' + str(i + 1) + '/' + 'frame_' + str(j + 1) + '.mat' + ' ' + str(i) + '\n'
+    path += '/' + str(i + 1) + '/' + 'frame_' + str(j + 1) + '.mat' + ' ' + str(y) + '\n'
     return path
 
 
-test_indices = DATA[9]
-for i in range(9):
-
-    val_indices = DATA[i]
+for i in range(10):
+    openset = Data[i]
+    open_val_indices = np.array(i * 500 + openset[:int(500 * 0.1)], dtype='int')
+    open_test_indices = np.array(i * 500 + openset[int(500 * 0.1):int(500 * 0.2)], dtype='int')
+    val_indices = np.array([], dtype='int')
     train_indices = np.array([], dtype='int')
-    for id, j in enumerate(DATA):
-        if id == i or id == 9:
-            continue
-        train_indices = np.append(train_indices, j)
-    for j in test_indices:
-        ftest[i].write(create_path(j))
-    for j in val_indices:
-        fval[i].write(create_path(j))
-    for j in train_indices:
-        ftrain[i].write(create_path(j))
+    test_indices = np.array([], dtype='int')
 
-for i in range(9):
+    for j in range(10):
+        if i == j:
+            continue
+        val_indices = np.append(val_indices, j * 500 + Data[j][:int(500 * 0.1)])
+        test_indices = np.append(test_indices, j * 500 + Data[j][int(500 * 0.1):int(500 * 0.2)])
+        train_indices = np.append(train_indices, j * 500 + Data[j][int(500 * 0.2):])
+    open_val_indices = np.append(open_val_indices, val_indices)
+    open_test_indices = np.append(open_test_indices, test_indices)
+    for j in test_indices:
+        ftest[i].write(create_path(j, i))
+    for j in val_indices:
+        fval[i].write(create_path(j, i))
+    for j in train_indices:
+        ftrain[i].write(create_path(j, i))
+    for j in open_val_indices:
+        foval[i].write(create_path(j, i))
+    for j in open_test_indices:
+        fotest[i].write(create_path(j, i))
+
+for i in range(10):
     ftest[i].close()
     fval[i].close()
     ftrain[i].close()
+    fotest[i].close()
+    foval[i].close()

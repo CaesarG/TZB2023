@@ -25,8 +25,8 @@ from model.Focus import Focus
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD, IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD
 
 
-def getEfficientNet():
-    model = timm.create_model('efficientnet_b0', pretrained=True, num_classes=10)
+def getEfficientNet(args):
+    model = timm.create_model('efficientnet_b0', pretrained=True, num_classes=args.num_classes)
     if args.Focus:
         print("Focused!")
         layer = [Focus(2), nn.Conv2d(in_channels=4, out_channels=32, kernel_size=(3, 3), stride=(1, 1),
@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('--channel', type=int, default=4, help='Number of channel')
     parser.add_argument('--ifft', type=str, default='False', help='Whether do ifft transform')
     parser.add_argument('--num_classes', type=int, default=10, help='Number of classes')
-    parser.add_argument('--num_epoch', type=int, default=100, help='Number of epochs')
+    parser.add_argument('--num_epoch', type=int, default=60, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
     parser.add_argument('--num_workers', type=int, default=20, help='Num_workers for dataloader')
     parser.add_argument('--model', type=str, default='vgg', help='model of backbone: vgg or Alexnet')
@@ -51,13 +51,13 @@ def parse_args():
     parser.add_argument('--ngpus', type=int, default=1, help='Number of gpus, ngpus>1 for multigpu')
     parser.add_argument('--resume_train', type=str, default='', help='Weights resumed in training/Absolute path')
     parser.add_argument('--resume', type=str, default='model_10.pth', help='Weights resumed testing and evaluation')
-    parser.add_argument('--weight_save', type=str, default='Cross_Validation/weight_of_model',
+    parser.add_argument('--weight_save', type=str, default='weight_of_model',
                         help='Weights saved directory')
     parser.add_argument('--data_dir', type=str, default='dataRCS/annotations', help='Path of data and annotation '
                                                                                     'directory')
     parser.add_argument('--test_txt', type=str, default='test.txt', help='The name of test file in dataRCS/annotations '
                                                                          'for test or eval')
-    parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval}')
+    parser.add_argument('--phase', type=str, default='test', help='Phase choice= {train, test, eval, cv}')
     parser.add_argument('--CA', action="store_true", default=False, help='Whether to use CA Attention')
     parser.add_argument('--cfg', default="./experiments/supernet/supernet-T.yaml",
                         help='experiment configure file name', type=str)
@@ -124,7 +124,7 @@ if __name__ == '__main__':
             #                                 change_qkv=args.change_qkv, abs_pos=not args.no_abs_pos).cuda()
             # model.set_sample_config(config=config)
         elif args.model == 'efficientnet':
-            model = getEfficientNet()
+            model = getEfficientNet(args)
             model.cuda()
 
         elif args.model == 'resnet':
@@ -151,7 +151,7 @@ if __name__ == '__main__':
         print('invalid num of channel')
 
     if args.phase == 'train':
-        rcs = train.TrainModule(dataset=dataset, model=model)
+        rcs = train.TrainModule(dataset=dataset, model=model, args=args)
         rcs.train_network(args)
     elif args.phase == 'test':
         rcs = test.TestModule(dataset=dataset, model=model)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
         WS = args.weight_save
         DD = args.data_dir
         for i in range(9):
-            model = getEfficientNet()
+            model = getEfficientNet(args)
             model.cuda()
             rcs = train.TrainModule(dataset=dataset, model=model)
             args.weight_save = WS + str(i)

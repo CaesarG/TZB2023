@@ -54,7 +54,8 @@ class EvalModule(object):
                 pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)    # 降序排列预测结果
                 pr_result = pr_sort_index[0]
                 pr_conf = pr_decs[pr_result]
-
+                if gt == 9:
+                    print(pr_result)
                 confusion_cnt[gt] += 1
                 Confusion_Matrix[gt][pr_result] += 1
                 if pr_result == gt:

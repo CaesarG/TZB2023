@@ -149,3 +149,7 @@ weight_of_model/*
 /data4/
 /data5/
 /Cross_Validation/*
+*.xlsx
+*.pth
+/validDATA*/*
+*.dll
