@@ -9,6 +9,7 @@ import numpy as np
 import sklearn.metrics
 
 NUM_WORKERS=23
+NUM_CLASSES = 9
 
 def accuracy(x, gt):
 	predicted = np.argmin(x, axis = 1)
@@ -16,6 +17,10 @@ def accuracy(x, gt):
 	acc = np.sum(predicted == gt)/total
 	return acc
 
+def acc_predicted(predicted, gt):
+    total = len(gt)
+    acc = np.sum(predicted == gt) / total
+    return acc
 
 def auroc(inData, outData, in_low = True):
 	inDataMin = np.min(inData, 1)
@@ -31,10 +36,10 @@ def get_model(cust=False):
     if cust:
         model = EfficientNet.from_pretrained('efficientnet-b0',
                                                     in_channels=2,
-                                                    num_classes=10)   
+                                                    num_classes=NUM_CLASSES)   
              
     else:
-        model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=10)
+        model = timm.create_model('efficientnet_b0', pretrained=True,num_classes=NUM_CLASSES)
         model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
         # model.conv_stem=nn.Conv2d(2,32,kernel_size=(3,3),stride=(1,1),padding=(1,1),bias=False)
     model.cuda()
@@ -45,7 +50,7 @@ class Openmax(nn.Module):
     def __init__(self, weight_path, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.model=get_model(cust=False)
-        self.num_classes=10
+        self.num_classes=NUM_CLASSES
         self.anchors = nn.Parameter(torch.zeros(self.num_classes,self.num_classes).double())
         self.load_weight(weight_loc=weight_path)
         self.set_dataloader()
@@ -77,17 +82,24 @@ class Openmax(nn.Module):
         
     def set_dataloader(self,ifft=False):
         dataset=myDataset_ifft
-        train_set=dataset(annotation_lines='dataRCS/annotations/train.txt')
-        val_set=dataset(annotation_lines='dataRCS/annotations/val.txt')
+        base_path = 'openset_annotations/annotations0/'
+        train_set = dataset(annotation_lines=base_path + 'train.txt')
+        val_set = dataset(annotation_lines=base_path + 'val.txt')
+        test_set = dataset(annotation_lines=base_path + 'test.txt')
+        openset_test = dataset(annotation_lines=base_path + 'open_test.txt')
+        openset_val = dataset(annotation_lines=base_path + 'open_val.txt')
+        
+        # train_set=dataset(annotation_lines='dataRCS/annotations/train.txt')
+        # val_set=dataset(annotation_lines='dataRCS/annotations/val.txt')
         
         self.dataloader_close=torch.utils.data.DataLoader(train_set,
-                                                            batch_size=4,
+                                                            batch_size=1,
                                                             shuffle=True,
                                                             num_workers=NUM_WORKERS,
                                                             pin_memory=True,
                                                             drop_last=True)
-        self.dataloader_open=torch.utils.data.DataLoader(val_set,
-                                                            batch_size=3,
+        self.dataloader_open=torch.utils.data.DataLoader(openset_val,
+                                                            batch_size=1,
                                                             shuffle=True,
                                                             num_workers=NUM_WORKERS,
                                                             pin_memory=True,
@@ -146,7 +158,7 @@ class Openmax(nn.Module):
         return activation,X, y,y_predict        
         
         
-    def find_anchor_means(self, only_correct=False):\
+    def find_anchor_means(self, only_correct=False):
         
         means = [None for i in range(self.num_classes)]
         
@@ -162,26 +174,37 @@ class Openmax(nn.Module):
     def set_threshold(self,threshold):
         self.threshold=threshold
         
-    def get_predicted(self):
-        total_activation,total_scores,total_gt,total_predicts = self.get_output('open', data_idx = 1, calculate_scores = True)
-        predicted = np.argmin(total_scores, axis = 1)
+    def get_predicted(self,total_scores):
+        predicted = np.argmin(total_scores, axis=1)
+        # reject the smaple with distance larger than threshold
+        predicted[np.min(total_scores, axis=1) > self.threshold] = 9
+        return predicted
         
         
         
 if __name__ == '__main__':
     alpha = 5
-    num_classes = 10
+    num_classes = NUM_CLASSES
     anchors = torch.diag(torch.Tensor([alpha for i in range(num_classes)]))
-    classifier=Openmax('./weight_of_model_imaging_effb0/model_best_39.pth')
+    classifier = Openmax('weight_of_model/model_best_27.pth')
     classifier.set_anchors(anchors)
     classifier.eval()
     classifier.set_anchors(classifier.find_anchor_means(only_correct=True))
-    total_activation_know,total_scores_know,total_gt_know,total_predicts_know = classifier.get_output('close', data_idx = 1, calculate_scores = True) 
-    total_activation,total_scores,total_gt,total_predicts = classifier.get_output('open',data_idx = 1, calculate_scores = True)
-    
+    classifier.set_threshold(20)
+    total_activation_know, total_scores_know, total_gt_know, total_predicts_know = classifier.get_output('close',
+                                                                                                         data_idx=1,
+                                                                                                         calculate_scores=True,
+                                                                                                         only_correct=False)
+    total_activation, total_scores, total_gt, total_predicts = classifier.get_output('open', data_idx=1,
+                                                                                     calculate_scores=True,
+                                                                                     only_correct=False)
+    open_predicted = classifier.get_predicted(total_scores)
     accuracy_know = accuracy(total_scores_know, total_gt_know)
+    accuracy_open = acc_predicted(open_predicted, total_gt)
+    # auroc, th = auroc(total_scores_know[:, 1:], total_scores[:, 1:])
+    # print(auroc.shape)
+    # print(th.shape)
+    print('acc_know=', accuracy_know)
+    print('acc_open=', accuracy_open)
     auroc,th = auroc(total_scores_know, total_scores)
-    print(auroc.shape)
-    print(th.shape)
-    print('acc_know=',accuracy_know)
     print('AUROC =', auroc)
