@@ -1,13 +1,16 @@
 import numpy as np
 from IPython.core.debugger import set_trace
-from torchvision import transforms
 from timm.data import create_transform
 import matplotlib.pyplot as plt
+import torchvision.transforms as T
 
 def pre_process(x,type=['imaging']):
     if 'abs_ifft' in type:
         x=np.log10(1+np.abs(np.fft.ifftshift(np.fft.ifft(x.T)))).astype(np.float32)
     elif 'imaging' in type:
+        x=np.fft.ifft(x.T)
+        x=np.fft.fftshift(np.log10(1+np.abs(np.fft.fft(x.T))).T).astype(np.float32)   
+    elif 'imaging_log' in type:
         x=np.fft.ifft(x.T)
         x=np.fft.fftshift(np.log10(1+np.abs(np.fft.fft(x.T))).T).astype(np.float32)      
     elif 'only_log' in type:

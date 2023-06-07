@@ -203,6 +203,18 @@ class Openmax(nn.Module):
             print("range of min_score is " + str(all_min) + " to " + str(all_max))
         return predicted
 
+    def get_predicted_conf(self,activation,print_opt):
+        softmax = nn.Softmax(dim=1)
+        pr_decs = softmax(torch.Tensor(activation).squeeze()).numpy()
+        predicted = np.argmax(pr_decs, axis=1)
+        conf= np.max(pr_decs,axis=1)
+        # reject the smaple with distance larger than threshold
+        predicted[conf < self.threshold] = NUM_CLASSES
+        if(print_opt):
+            all_min = np.min(conf)
+            all_max = np.max(conf)
+            print("range of min_score is " + str(all_min) + " to " + str(all_max))
+        return predicted
 
 if __name__ == "__main__":
     alpha = 5
@@ -212,7 +224,7 @@ if __name__ == "__main__":
     classifier.set_anchors(anchors)
     classifier.eval()
     classifier.set_anchors(classifier.find_anchor_means(only_correct=False))
-    classifier.set_threshold(20)
+    classifier.set_threshold(0)
     (
         total_activation_know,
         total_scores_know,
@@ -230,21 +242,35 @@ if __name__ == "__main__":
         calculate_scores=True,
         only_correct=False,
     )
-    open_predicted = classifier.get_predicted(total_scores,True)
+    test = 'dist'
+    # Distance reject test
+    
     accuracy_know = accuracy(total_scores_know, total_gt_know)
-    accuracy_open = acc_predicted(open_predicted, total_gt)
-    # auroc, th = auroc(total_scores_know[:, 1:], total_scores[:, 1:])
-    # print(auroc.shape)
-    # print(th.shape)
     print("acc_know=", accuracy_know)
-    print("acc_open=", accuracy_open)
-    auroc,th = auroc(total_scores_know, total_scores)
-    print('AUROC =', auroc)
+    
+    if test=='dist':
+        classifier.set_threshold(1e5)
+        open_predicted = classifier.get_predicted(total_scores,True)
+        accuracy_open = acc_predicted(open_predicted, total_gt)
+        print("acc_open(no reject)=", accuracy_open)
+        auroc,th = auroc(total_scores_know, total_scores)
+        print('AUROC =', auroc)
     # print('AUROC_TH =', th.shape)
     # Test threshold
-    for test_th in th:
-        classifier.set_threshold(test_th)
-        test_predicted=classifier.get_predicted(total_scores,False)
-        accuracy_open = acc_predicted(test_predicted, total_gt)
-        print(accuracy_open)
-    
+        for test_th in th:
+            classifier.set_threshold(test_th)
+            test_predicted=classifier.get_predicted(total_scores,False)
+            accuracy_open = acc_predicted(test_predicted, total_gt)
+            print(accuracy_open)
+    else:    
+    # Conf reject test
+        classifier.set_threshold(0)
+        open_predicted = classifier.get_predicted_conf(total_activation,True)
+        accuracy_open = acc_predicted(open_predicted, total_gt)
+        print("acc_open(no reject)=", accuracy_open)
+        for test_th in np.linspace(0.99,1.00,20):
+            classifier.set_threshold(test_th)
+            test_predicted=classifier.get_predicted(total_scores,False)
+            accuracy_open = acc_predicted(test_predicted, total_gt)
+            print(accuracy_open)
+

@@ -9,7 +9,7 @@ import numpy as np
 import sklearn.metrics
 
 NUM_WORKERS = 16
-
+NUM_CLASSES = 9
 
 def accuracy(x, gt):
     predicted = np.argmin(x, axis=1)
@@ -173,9 +173,7 @@ class Openmax(nn.Module):
     def set_threshold(self, threshold):
         self.threshold = threshold
 
-    def get_predicted(self):
-        total_activation, total_scores, total_gt, total_predicts = self.get_output('open', data_idx=1,
-                                                                                   calculate_scores=True)
+    def get_predicted(self,total_scores):
         predicted = np.argmin(total_scores, axis=1)
         # reject the smaple with distance larger than threshold
         predicted[np.min(total_scores, axis=1) > self.threshold] = 9
@@ -186,7 +184,7 @@ if __name__ == '__main__':
     alpha = 5
     num_classes = 9
     anchors = torch.diag(torch.Tensor([alpha for i in range(num_classes)]))
-    classifier = Openmax('weight_of_model/model_best_27.pth')
+    classifier = Openmax('weight_of_model/model_best_331.pth')
     classifier.set_anchors(anchors)
     classifier.eval()
     classifier.set_anchors(classifier.find_anchor_means(only_correct=True))
@@ -198,7 +196,7 @@ if __name__ == '__main__':
     total_activation, total_scores, total_gt, total_predicts = classifier.get_output('open', data_idx=1,
                                                                                      calculate_scores=True,
                                                                                      only_correct=False)
-    open_predicted = classifier.get_predicted()
+    open_predicted = classifier.get_predicted(total_scores)
     accuracy_know = accuracy(total_scores_know, total_gt_know)
     accuracy_open = acc_predicted(open_predicted, total_gt)
     # auroc, th = auroc(total_scores_know[:, 1:], total_scores[:, 1:])
@@ -206,4 +204,5 @@ if __name__ == '__main__':
     # print(th.shape)
     print('acc_know=', accuracy_know)
     print('acc_open=', accuracy_open)
-    # print('AUROC =', auroc)
+    auroc,th = auroc(total_scores_know, total_scores)
+    print('AUROC =', auroc)

@@ -14,6 +14,7 @@ from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, Ablat
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
+NUM_CLASSES=9
 class EvalModule(object):
     def __init__(self, dataset, model):
         self.dataset = dataset
@@ -53,8 +54,8 @@ class EvalModule(object):
         pr_conf_sum = 0
         false_conf_sum = 0
         softmax = nn.Softmax(dim=1)
-        Confusion_Matrix = np.zeros([10, 10])    # 混淆矩阵，第一维对应真实值，第二维对应预测值
-        confusion_cnt = np.zeros(10)    # 对每个类别进行计数
+        Confusion_Matrix = np.zeros([NUM_CLASSES, NUM_CLASSES])    # 混淆矩阵，第一维对应真实值，第二维对应预测值
+        confusion_cnt = np.zeros(NUM_CLASSES)    # 对每个类别进行计数
         with torch.no_grad():
             for cnt, data in enumerate(dsets_loader):
                 data_rcs = data[0]
@@ -88,34 +89,34 @@ class EvalModule(object):
         print(Confusion_Matrix)
         
 
-        for cnt, data in enumerate(dsets_loader):
-            # if (cnt % 100)==0:
-            targets = None
-            grayscale_cam = self.cam(input_tensor=data[0], targets=targets, eigen_smooth=True)
-            grayscale_cam = grayscale_cam[0, :].T
-            data_rcs = data[0].cpu().clone().squeeze(0)
-            data_Ev = data_rcs[0,:,:].T
-            data_Eh = data_rcs[1,:,:].T
-            img_Ev = torchvision.transforms.ToPILImage()(data_Ev)
-            img_Eh = torchvision.transforms.ToPILImage()(data_Eh)
-            img_Ev = img_Ev/(np.max(img_Ev)+1e-6)
-            img_Eh = img_Eh/(np.max(img_Eh)+1e-6)
-            # img_Eh = img_Eh.convert("RGB")
-            sm=cm.ScalarMappable(cmap='viridis')
-            rgb_img_Ev = sm.to_rgba(img_Ev, bytes=True)
-            rgb_img_Eh = sm.to_rgba(img_Eh, bytes=True)
-            rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
-            rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
-            rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
-            rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
-            visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.5) 
-            visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.5)
-            gt=data[1].item()
-            plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Ev.png', visualization_Ev)
-            plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Eh.png', visualization_Eh)
-            # plt.subplot(121) 
-            # plt.imshow(visualization_Ev)
-            # plt.subplot(122)
-            # plt.imshow(visualization_Eh)
-            # plt.show()      
+        # for cnt, data in enumerate(dsets_loader):
+        #     # if (cnt % 100)==0:
+        #     targets = None
+        #     grayscale_cam = self.cam(input_tensor=data[0], targets=targets, eigen_smooth=True)
+        #     grayscale_cam = grayscale_cam[0, :].T
+        #     data_rcs = data[0].cpu().clone().squeeze(0)
+        #     data_Ev = data_rcs[0,:,:].T
+        #     data_Eh = data_rcs[1,:,:].T
+        #     img_Ev = torchvision.transforms.ToPILImage()(data_Ev)
+        #     img_Eh = torchvision.transforms.ToPILImage()(data_Eh)
+        #     img_Ev = img_Ev/(np.max(img_Ev)+1e-6)
+        #     img_Eh = img_Eh/(np.max(img_Eh)+1e-6)
+        #     # img_Eh = img_Eh.convert("RGB")
+        #     sm=cm.ScalarMappable(cmap='viridis')
+        #     rgb_img_Ev = sm.to_rgba(img_Ev, bytes=True)
+        #     rgb_img_Eh = sm.to_rgba(img_Eh, bytes=True)
+        #     rgb_img_Ev = cv2.cvtColor(rgb_img_Ev, cv2.COLOR_RGBA2RGB)
+        #     rgb_img_Eh = cv2.cvtColor(rgb_img_Eh, cv2.COLOR_RGBA2RGB)
+        #     rgb_img_Ev = rgb_img_Ev/np.max(rgb_img_Ev)
+        #     rgb_img_Eh = rgb_img_Eh/np.max(rgb_img_Eh)
+        #     visualization_Ev = show_cam_on_image(rgb_img_Ev, grayscale_cam, use_rgb=True, image_weight=0.5) 
+        #     visualization_Eh = show_cam_on_image(rgb_img_Eh, grayscale_cam, use_rgb=True, image_weight=0.5)
+        #     gt=data[1].item()
+        #     plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Ev.png', visualization_Ev)
+        #     plt.imsave('heatmap/'+str(gt)+'_'+str(cnt)+'_Eh.png', visualization_Eh)
+        #     # plt.subplot(121) 
+        #     # plt.imshow(visualization_Ev)
+        #     # plt.subplot(122)
+        #     # plt.imshow(visualization_Eh)
+        #     # plt.show()      
         return 0
