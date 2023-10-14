@@ -153,3 +153,5 @@ weight_of_model/*
 *.pth
 /validDATA*/*
 *.dll
+*.vsdx
+*.emf

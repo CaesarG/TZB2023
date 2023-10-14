@@ -1,11 +1,13 @@
 import os
+import time
+
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 import scipy.io as sciio
 import pandas as pd
-from tqdm import trange
+# from tqdm import trange
 
 # ——————————————————————————————————————————————————————————————————————————————————————————————————————————
 DIR = 'validDATA'
@@ -85,12 +87,14 @@ if __name__ == '__main__':
 
     ans = []
     with torch.no_grad():
-        for i in trange(dsets.length):
+        for i in range(dsets.length):
             res = [i + 1, 'frame_{}'.format(i + 1)]
             data_rcs = dsets[i]
             # print(data_rcs)
             data_rcs = data_rcs.to(device='cuda:0', non_blocking=True)
+            st = time.time()
             pr_decs = model(data_rcs)
+            print(time.time() - st)
             pr_decs = softmax(pr_decs)
             pr_decs = pr_decs.squeeze()
             pr_sort_index = sorted(range(len(pr_decs)), key=lambda k: pr_decs[k], reverse=True)  # 降序排列预测结果
